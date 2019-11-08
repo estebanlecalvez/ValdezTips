@@ -10,6 +10,7 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import FoldersPage from "./components/FoldersPage";
 import { Button } from "@material-ui/core";
 import HomePage from "./components/HomePage";
+import Tips from "./components/Tips";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -88,7 +89,7 @@ export default function SearchAppBar() {
               ValdezTips
             </Button>
 
-            <Button className={classes.title}  href="/folders">
+            <Button className={classes.title} href="/folders">
               Folders
             </Button>
 
@@ -109,6 +110,9 @@ export default function SearchAppBar() {
           </Toolbar>
         </AppBar>
         <Switch>
+          <Route path="/folders/:id">
+            <Tips />
+          </Route>
           <Route path="/folders">
             <FoldersPage />
           </Route>

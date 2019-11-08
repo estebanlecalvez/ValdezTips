@@ -1,5 +1,6 @@
 import React from "react";
 import Grid from "@material-ui/core/Grid";
+import { withRouter } from "react-router-dom";
 import {
   Card,
   CardActionArea,
@@ -11,7 +12,8 @@ import {
   TextField,
   Link,
   ButtonBase,
-  Container
+  Container,
+  CircularProgress
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import Dialog from "@material-ui/core/Dialog";
@@ -57,6 +59,9 @@ const styles = theme => ({
   },
   textField: {
     width: "20vw"
+  },
+  linkCard: {
+    color: "none"
   }
 });
 
@@ -131,34 +136,43 @@ class FoldersPage extends React.Component {
     console.log("you clicked on card: " + id);
   }
 
+  goIntoFolder(id) {
+    let path = `/folders/` + id;
+    this.props.history.push(path);
+  }
+
   render() {
     const { classes } = this.props;
-    var { folders } = this.state;
+    var { folders, image } = this.state;
     var renderFolders = folders.map(folder => (
       <Grid key={folder.id} xs={3} item>
-        <Card className={classes.card}>
-          <ButtonBase
-            className={classes.card}
-            onClick={event => this.onClickCard(folder.id)}
-          >
-            <CardActionArea>
+        <Card
+          className={classes.card}
+          onClick={() => this.goIntoFolder(folder.id)}
+        >
+          <CardActionArea>
+            {folder.data.image ? (
               <CardMedia
+                src=""
+                children=""
                 className={classes.media}
                 image={folder.data.image}
                 title={folder.data.name + " image."}
               />
-              <CardContent>
-                <Typography
-                  gutterBottom
-                  variant="h5"
-                  component="h2"
-                  className={classes.cardTitle}
-                >
-                  {folder.data.name}
-                </Typography>
-              </CardContent>
-            </CardActionArea>
-          </ButtonBase>
+            ) : (
+              <CircularProgress color="secondary" />
+            )}
+            <CardContent>
+              <Typography
+                gutterBottom
+                variant="h5"
+                component="h2"
+                className={classes.cardTitle}
+              >
+                {folder.data.name}
+              </Typography>
+            </CardContent>
+          </CardActionArea>
         </Card>
       </Grid>
     ));
@@ -207,11 +221,23 @@ class FoldersPage extends React.Component {
           <Container>
             <Card className={classes.card}>
               <CardActionArea>
-                <CardMedia
-                  className={classes.media}
-                  image={this.state.image}
-                  title={this.state.name + " image."}
-                />
+                {this.state.image ? (
+                  <CardMedia
+                    src=""
+                    children=""
+                    className={classes.media}
+                    image={this.state.image}
+                    title={this.state.name + " image."}
+                  />
+                ) : (
+                  <CardMedia
+                    src=""
+                    children=""
+                    className={classes.media}
+                    image="https://image.shutterstock.com/image-vector/picture-vector-icon-no-image-260nw-1350441335.jpg"
+                    title={this.state.name + " image."}
+                  />
+                )}
                 <CardContent>
                   <Typography
                     gutterBottom
@@ -244,4 +270,4 @@ FoldersPage.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(FoldersPage);
+export default withRouter(withStyles(styles)(FoldersPage));
