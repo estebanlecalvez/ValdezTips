@@ -11,7 +11,8 @@ import {
   TextField,
   Link,
   ButtonBase,
-  Container
+  Container,
+  CircularProgress
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import Dialog from "@material-ui/core/Dialog";
@@ -36,7 +37,8 @@ const styles = theme => ({
   },
 
   card: {
-    width: 300
+    width: 300,
+    height:200,
   },
   media: {
     height: 140
@@ -60,6 +62,9 @@ const styles = theme => ({
   },
   linkCard: {
     color: "none"
+  },
+  tipText:{
+
   }
 });
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -68,9 +73,48 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 class Tips extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { open: false };
+    this.state = { open: false, name: "", text: "", tips: [] };
+    this.publishToFirestore = this.publishToFirestore.bind(this);
+    this.fetchTips = this.fetchTips.bind(this);
+    this.handleClose = this.handleClose.bind(this);
   }
 
+  publishToFirestore() {
+    const db = firebase.firestore();
+    const tipRef = db
+      .collection("tips")
+      .add({
+        gameId: this.props.match.params.id,
+        name: this.state.name,
+        text: this.state.text
+      })
+      .then(function() {
+        console.log("Tips Successfully added");
+      })
+      .catch(function(error) {
+        console.error("Error writing document: ", error);
+      });
+    this.handleClose();
+    this.fetchTips();
+  }
+
+  fetchTips() {
+    const db = firebase.firestore();
+    db.collection("tips")
+      .where("gameId", "==", this.props.match.params.id)
+      .get()
+      .then(querySnapshot => {
+        const data = querySnapshot.docs.map(doc => {
+          return { id: doc.id, data: doc.data() };
+        });
+        console.log(data);
+        this.setState({ tips: data });
+      });
+  }
+
+  componentDidMount() {
+    this.fetchTips();
+  }
   handleClickOpen = () => {
     this.setState({ open: true });
   };
@@ -79,10 +123,51 @@ class Tips extends React.Component {
     this.setState({ open: false });
   };
 
+  changeName = event => {
+    this.setState({
+      name: event.target.value
+    });
+  };
+
+  changeText = event => {
+    this.setState({
+      text: event.target.value
+    });
+  };
+
   render() {
     const { gameId, classes } = this.props;
+    const { tips } = this.state;
+    var renderTips = tips.map(tip => (
+      <Grid key={tip.id} xs={3} item>
+        <Card className={classes.card}>
+          <CardActionArea>
+            <CardContent>
+              <Typography
+                gutterBottom
+                variant="h5"
+                component="h2"
+                className={classes.cardTitle}
+              >
+                {tip.data.name}
+              </Typography>
+              <Typography className={classes.tipsText}>{tip.data.text}</Typography>
+            </CardContent>
+          </CardActionArea>
+        </Card>
+      </Grid>
+    ));
     return (
       <React.Fragment>
+        <div className={classes.pageContent}>
+          <Grid container className={classes.root} spacing={2}>
+            <Grid item xs={12}>
+              <Grid container spacing={3}>
+                {renderTips}
+              </Grid>
+            </Grid>
+          </Grid>
+        </div>
         <Fab aria-label="add" className={classes.floatingActionButton}>
           <AddIcon onClick={this.handleClickOpen} />
         </Fab>
@@ -95,32 +180,25 @@ class Tips extends React.Component {
           aria-describedby="alert-dialog-slide-description"
         >
           <DialogTitle id="alert-dialog-slide-title">
-            {"Créer un dossier"}
+            {"Créer une astuce"}
           </DialogTitle>
-          <DialogContent>Bonjour</DialogContent>
-          <Container>
-            <Card className={classes.card}>
-              <CardActionArea>
-                <CardMedia
-                  src=""
-                  children=""
-                  className={classes.media}
-                  image={this.state.image}
-                  title={this.state.name + " image."}
-                />
-                <CardContent>
-                  <Typography
-                    gutterBottom
-                    variant="h5"
-                    component="h2"
-                    className={classes.cardTitle}
-                  >
-                    {this.state.name}
-                  </Typography>
-                </CardContent>
-              </CardActionArea>
-            </Card>
-          </Container>
+          <DialogContent>
+            <form noValidate autoComplete="off">
+              <TextField
+                id="tip-name"
+                className={classes.textField}
+                label="Nom de l'astuce"
+                onChange={this.changeName}
+              />
+              <p></p>
+              <TextField
+                id="tip-text"
+                className={classes.textField}
+                label="Contenu de l'astuce"
+                onChange={this.changeText}
+              />
+            </form>
+          </DialogContent>
 
           <DialogActions>
             <Button onClick={this.publishToFirestore} color="primary">

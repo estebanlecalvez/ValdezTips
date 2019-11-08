@@ -110,9 +110,7 @@ export default function SearchAppBar() {
           </Toolbar>
         </AppBar>
         <Switch>
-          <Route path="/folders/:id">
-            <Tips />
-          </Route>
+          <Route path="/folders/:id" component={Tips} />
           <Route path="/folders">
             <FoldersPage />
           </Route>

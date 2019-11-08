@@ -143,7 +143,7 @@ class FoldersPage extends React.Component {
 
   render() {
     const { classes } = this.props;
-    var { folders, image } = this.state;
+    var { folders } = this.state;
     var renderFolders = folders.map(folder => (
       <Grid key={folder.id} xs={3} item>
         <Card
@@ -231,7 +231,8 @@ class FoldersPage extends React.Component {
                   />
                 ) : (
                   <CardMedia
-                    src=""
+                    sr
+                    c=""
                     children=""
                     className={classes.media}
                     image="https://image.shutterstock.com/image-vector/picture-vector-icon-no-image-260nw-1350441335.jpg"
