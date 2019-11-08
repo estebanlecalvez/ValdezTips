@@ -24,6 +24,9 @@ import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/styles";
 import firebase from "firebase";
 
+import CKEditor from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+
 const styles = theme => ({
   root: {
     flexGrow: 1
@@ -37,8 +40,7 @@ const styles = theme => ({
   },
 
   card: {
-    width: 300,
-    height:200,
+    width: 300
   },
   media: {
     height: 140
@@ -63,13 +65,16 @@ const styles = theme => ({
   linkCard: {
     color: "none"
   },
-  tipText:{
-
+  tipText: {},
+  editor: {
+    height: 500
   }
 });
+
 const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+    return <Slide direction="up" ref={ref} {...props} />;
+  });
+
 class Tips extends React.Component {
   constructor(props) {
     super(props);
@@ -137,7 +142,7 @@ class Tips extends React.Component {
 
   render() {
     const { gameId, classes } = this.props;
-    const { tips } = this.state;
+    const { tips, text } = this.state;
     var renderTips = tips.map(tip => (
       <Grid key={tip.id} xs={3} item>
         <Card className={classes.card}>
@@ -151,7 +156,10 @@ class Tips extends React.Component {
               >
                 {tip.data.name}
               </Typography>
-              <Typography className={classes.tipsText}>{tip.data.text}</Typography>
+
+              <Typography className={classes.tipsText}>
+                {tip.data.text}
+              </Typography>
             </CardContent>
           </CardActionArea>
         </Card>
@@ -191,12 +199,26 @@ class Tips extends React.Component {
                 onChange={this.changeName}
               />
               <p></p>
-              <TextField
-                id="tip-text"
-                className={classes.textField}
-                label="Contenu de l'astuce"
-                onChange={this.changeText}
-              />
+              <div>
+              <CKEditor
+                    editor={ ClassicEditor }
+                    data="<p>Hello from CKEditor 5!</p>"
+                    onInit={ editor => {
+                        // You can store the "editor" and use when it is needed.
+                        console.log( 'Editor is ready to use!', editor );
+                    } }
+                    onChange={ ( event, editor ) => {
+                        const data = editor.getData();
+                        console.log( { event, editor, data } );
+                    } }
+                    onBlur={ ( event, editor ) => {
+                        console.log( 'Blur.', editor );
+                    } }
+                    onFocus={ ( event, editor ) => {
+                        console.log( 'Focus.', editor );
+                    } }
+                />
+              </div>
             </form>
           </DialogContent>
 
