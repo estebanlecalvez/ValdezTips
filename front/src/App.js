@@ -86,11 +86,7 @@ export default function SearchAppBar() {
               <AcUnitIcon />
             </IconButton>
             <Button className={classes.title} href="/">
-              ValdezTips
-            </Button>
-
-            <Button className={classes.title} href="/folders">
-              Folders
+              Parcourir les jeux
             </Button>
 
             <div className={classes.search}>
@@ -115,7 +111,7 @@ export default function SearchAppBar() {
             <FoldersPage />
           </Route>
           <Route path="/">
-            <HomePage />
+            <FoldersPage />
           </Route>
         </Switch>
       </Router>
