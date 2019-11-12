@@ -10,6 +10,7 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import FoldersPage from "./components/FoldersPage";
 import { Button } from "@material-ui/core";
 import Tips from "./components/Tips";
+import Tip from "./components/Tip";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -105,6 +106,7 @@ export default function SearchAppBar() {
           </Toolbar>
         </AppBar>
         <Switch>
+          <Route path="/tip/:id" component={Tip} />
           <Route path="/folders/:id" component={Tips} />
           <Route path="/folders">
             <FoldersPage />

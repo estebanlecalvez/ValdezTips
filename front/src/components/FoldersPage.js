@@ -69,7 +69,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 class FoldersPage extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { image: "", name: "", open: false, folders: [] };
+    this.state = { image: "", name: "", open: false, folders: [], charging: true };
     this.publishToFirestore = this.publishToFirestore.bind(this);
     this.fetchFolders = this.fetchFolders.bind(this);
   }
@@ -121,7 +121,7 @@ class FoldersPage extends React.Component {
           return { id: doc.id, data: doc.data() };
         });
         console.log(data);
-        this.setState({ folders: data });
+        this.setState({ folders: data, charging: false });
       });
   }
 
@@ -140,7 +140,7 @@ class FoldersPage extends React.Component {
 
   render() {
     const { classes } = this.props;
-    var { folders } = this.state;
+    var { folders, charging } = this.state;
     var renderFolders = folders.map(folder => (
       <Grid key={folder.id} xs={3} item>
         <Card
@@ -176,13 +176,15 @@ class FoldersPage extends React.Component {
     return (
       <React.Fragment>
         <div className={classes.pageContent}>
-          <Grid container className={classes.root} spacing={2}>
-            <Grid item xs={12}>
-              <Grid container spacing={3}>
-                {renderFolders}
+          {charging ? <CircularProgress /> :
+            <Grid container className={classes.root} spacing={2}>
+              <Grid item xs={12}>
+                <Grid container spacing={3}>
+                  {renderFolders}
+                </Grid>
               </Grid>
             </Grid>
-          </Grid>
+          }
         </div>
         <Fab aria-label="add" className={classes.floatingActionButton}>
           <AddIcon onClick={this.handleClickOpen} />

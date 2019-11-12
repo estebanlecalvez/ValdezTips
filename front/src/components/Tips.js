@@ -8,6 +8,8 @@ import {
   Fab,
   Button,
   TextField,
+  CircularProgress,
+  CardActions,
 
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
@@ -20,9 +22,8 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import Slide from "@material-ui/core/Slide";
 import { withStyles } from "@material-ui/styles";
 import firebase from "firebase";
-
-import CKEditor from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const styles = theme => ({
   root: {
@@ -37,7 +38,8 @@ const styles = theme => ({
   },
 
   card: {
-    width: 300
+    width: 300,
+    maxHeight: 200
   },
   media: {
     height: 140
@@ -62,6 +64,9 @@ const styles = theme => ({
   linkCard: {
     color: "none"
   },
+  dialog: {
+    minHeight: "50vh"
+  }
 });
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -71,7 +76,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 class Tips extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { open: false, name: "", text: "", tips: [], isDialogFullScreen: false, gameId: this.props.match.params.id };
+    this.state = { open: false, name: "", description: "", text: "", tips: [], isDialogFullScreen: false, gameId: this.props.match.params.id, charging: true };
     console.log(this.state.gameId);
     this.publishToFirestore = this.publishToFirestore.bind(this);
     this.fetchTips = this.fetchTips.bind(this);
@@ -86,7 +91,10 @@ class Tips extends React.Component {
       .add({
         gameId: this.props.match.params.id,
         name: this.state.name,
-        text: this.state.text
+        description: this.state.description,
+        text: this.state.text,
+        createdOn: new Date(),
+        lastModifiedOn: new Date()
       })
       .then(function () {
         console.log("Tips Successfully added");
@@ -99,6 +107,7 @@ class Tips extends React.Component {
   }
 
   fetchTips() {
+    this.setState({ charging: true });
     const db = firebase.firestore();
     db.collection("tips")
       .where("gameId", "==", this.props.match.params.id)
@@ -107,7 +116,7 @@ class Tips extends React.Component {
         const data = querySnapshot.docs.map(doc => {
           return { id: doc.id, data: doc.data() };
         });
-        this.setState({ tips: data });
+        this.setState({ tips: data, charging: false });
       });
   }
 
@@ -138,18 +147,50 @@ class Tips extends React.Component {
     });
   };
 
+  changeDescription = event => {
+    this.setState({
+      description: event.target.value
+    });
+  };
+
   changeText = event => {
     this.setState({
       text: event.target.value
     });
   };
+  goIntoTip(id) {
+    let path = `/tip/` + id;
+    this.props.history.push(path);
+  }
+
 
   render() {
     const { classes } = this.props;
+    const { charging } = this.state;
+    const modules = {
+      toolbar: [
+        [{ 'header': [1, 2, false] }],
+        ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+        ['link', 'image'],
+        ['clean']
+      ],
+    };
+    var date = new Date().getDay()
+
+    const formats = [
+      'header',
+      'bold', 'italic', 'underline', 'strike', 'blockquote',
+      'list', 'bullet', 'indent',
+      'link', 'image'
+    ];
     const { tips, text, isDialogFullScreen } = this.state;
     var renderTips = tips.map(tip => (
       <Grid key={tip.id} xs={3} item>
-        <Card className={classes.card}>
+        <Card
+          className={classes.card}
+          onClick={() => this.goIntoTip(tip.id)}
+        >
           <CardActionArea>
             <CardContent>
               <Typography
@@ -160,25 +201,30 @@ class Tips extends React.Component {
               >
                 {tip.data.name}
               </Typography>
-
-              <Typography className={classes.tipsText}>
-                {tip.data.text}
+              <Typography>
+                {tip.data.description || "Pas de description"}
               </Typography>
             </CardContent>
           </CardActionArea>
+          {/* TODO: Handle la date */}
+          {/* <Typography>Créée le: {
+              tip.data.createdOn}</Typography> */}
         </Card>
       </Grid>
     ));
     return (
       <React.Fragment>
         <div className={classes.pageContent}>
-          <Grid container className={classes.root} spacing={2}>
-            <Grid item xs={12}>
-              <Grid container spacing={3}>
-                {renderTips}
+          {charging ? <CircularProgress /> :
+
+            <Grid container className={classes.root} spacing={2}>
+              <Grid item xs={12}>
+                <Grid container spacing={3}>
+                  {renderTips}
+                </Grid>
               </Grid>
             </Grid>
-          </Grid>
+          }
         </div>
         <Fab aria-label="add" className={classes.floatingActionButton}>
           <AddIcon onClick={this.handleClickOpen} />
@@ -190,6 +236,7 @@ class Tips extends React.Component {
             fullWidth
             fullScreen={isDialogFullScreen}
             onClose={this.handleClose}
+            className={classes.dialog}
           >
             <DialogTitle id="alert-dialog-slide-title">
               {"Créer une astuce"}
@@ -208,21 +255,24 @@ class Tips extends React.Component {
                   onChange={this.changeName}
                 />
                 <p></p>
-                <div>
-                  <CKEditor
-                    editor={ClassicEditor}
-                    data="<p>Hello from CKEditor 5!</p>"
-                    onInit={editor => {
-                      // You can store the "editor" and use when it is needed.
-                    }}
-                    onChange={(event, editor) => {
-                      this.setState({
-                        text: editor.getData()
-                      });
-                      console.log(text);
-                    }}
-                  />
-                </div>
+                <TextField
+                  id="tip-description"
+                  className={classes.textField}
+                  label="Description de l'astuce"
+                  onChange={this.changeDescription}
+                />
+                <p></p>
+                <p>Contenu de l'astuce</p>
+                <ReactQuill
+                  theme="snow"
+                  modules={modules}
+                  formats={formats}
+                  onChange={(value) => {
+                    this.setState({ text: value });
+                    console.log(value);
+                  }}>
+                </ReactQuill>
+                <p></p>
               </form>
             </DialogContent>
 
