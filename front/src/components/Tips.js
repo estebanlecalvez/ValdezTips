@@ -62,11 +62,6 @@ const styles = theme => ({
   linkCard: {
     color: "none"
   },
-  tipText: {},
-  dialog: {
-    minWidth: "70vh",
-    maxWidth: "70vh"
-  }
 });
 
 const Transition = React.forwardRef(function Transition(props, ref) {
