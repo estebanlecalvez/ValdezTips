@@ -114,23 +114,21 @@ class FoldersPage extends React.Component {
 
   fetchFolders() {
     const db = firebase.firestore();
+
     db.collection("folders")
       .get()
       .then(querySnapshot => {
         const data = querySnapshot.docs.map(doc => {
           return { id: doc.id, data: doc.data() };
         });
-        console.log(data);
         this.setState({ folders: data, charging: false });
       });
+
+
   }
 
   componentDidMount() {
     this.fetchFolders();
-  }
-
-  onClickCard(id) {
-    console.log("you clicked on card: " + id);
   }
 
   goIntoFolder(id) {

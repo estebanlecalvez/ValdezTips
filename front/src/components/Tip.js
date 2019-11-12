@@ -70,7 +70,6 @@ class Tip extends React.Component {
     docRef.get().then(doc => {
       if (doc.exists) {
         currentTip = doc.data();
-        console.log("Document data:", doc.data());
         this.setState({
           tip: currentTip,
           newtext: currentTip.text,
@@ -89,9 +88,7 @@ class Tip extends React.Component {
 
   }
   componentDidMount() {
-
     this.fetchTip();
-    console.log("state after fetchTip in cdm", this.state);
   }
 
   deleteTip() {
@@ -160,7 +157,6 @@ class Tip extends React.Component {
       'list', 'bullet', 'indent',
       'link', 'image'
     ];
-    console.log("state in render", this.state);
     return (
       <React.Fragment>
         <div className={classes.pageContent}>
@@ -240,7 +236,6 @@ class Tip extends React.Component {
                   value={newtext}
                   onChange={(value) => {
                     this.setState({ newtext: value });
-                    console.log(value);
                   }}>
                 </ReactQuill>
                 <p></p>

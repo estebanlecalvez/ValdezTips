@@ -76,8 +76,8 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 class Tips extends React.Component {
   constructor(props) {
     super(props);
+
     this.state = { open: false, name: "", description: "", text: "", tips: [], isDialogFullScreen: false, gameId: this.props.match.params.id, charging: true };
-    console.log(this.state.gameId);
     this.publishToFirestore = this.publishToFirestore.bind(this);
     this.fetchTips = this.fetchTips.bind(this);
     this.handleClose = this.handleClose.bind(this);
@@ -97,7 +97,8 @@ class Tips extends React.Component {
         lastModifiedOn: new Date()
       })
       .then(function () {
-        console.log("Tips Successfully added");
+        this.handleClose();
+        this.fetchTips();
       })
       .catch(function (error) {
         console.error("Error writing document: ", error);
@@ -162,7 +163,6 @@ class Tips extends React.Component {
     let path = `/tip/` + id;
     this.props.history.push(path);
   }
-
 
   render() {
     const { classes } = this.props;
@@ -269,7 +269,6 @@ class Tips extends React.Component {
                   formats={formats}
                   onChange={(value) => {
                     this.setState({ text: value });
-                    console.log(value);
                   }}>
                 </ReactQuill>
                 <p></p>
