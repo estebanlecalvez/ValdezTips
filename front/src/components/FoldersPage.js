@@ -10,8 +10,6 @@ import {
   Fab,
   Button,
   TextField,
-  Link,
-  ButtonBase,
   Container,
   CircularProgress
 } from "@material-ui/core";
@@ -68,7 +66,6 @@ const styles = theme => ({
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
-var foldersArray = [];
 class FoldersPage extends React.Component {
   constructor(props) {
     super(props);
@@ -99,18 +96,18 @@ class FoldersPage extends React.Component {
 
   publishToFirestore() {
     const db = firebase.firestore();
-    const folderRef = db
+    db
       .collection("folders")
       .add({
         name: this.state.name,
         image: this.state.image
       })
-      .then(function() {
+      .then(function () {
         console.log("Folders Successfully added");
         this.handleClose();
         this.fetchFolders();
       })
-      .catch(function(error) {
+      .catch(function (error) {
         console.error("Error writing document: ", error);
       });
   }
@@ -160,8 +157,8 @@ class FoldersPage extends React.Component {
                 title={folder.data.name + " image."}
               />
             ) : (
-              <CircularProgress color="secondary" />
-            )}
+                <CircularProgress color="secondary" />
+              )}
             <CardContent>
               <Typography
                 gutterBottom
@@ -230,15 +227,14 @@ class FoldersPage extends React.Component {
                     title={this.state.name + " image."}
                   />
                 ) : (
-                  <CardMedia
-                    sr
-                    c=""
-                    children=""
-                    className={classes.media}
-                    image="https://image.shutterstock.com/image-vector/picture-vector-icon-no-image-260nw-1350441335.jpg"
-                    title={this.state.name + " image."}
-                  />
-                )}
+                    <CardMedia
+                      src=""
+                      children=""
+                      className={classes.media}
+                      image="https://image.shutterstock.com/image-vector/picture-vector-icon-no-image-260nw-1350441335.jpg"
+                      title={this.state.name + " image."}
+                    />
+                  )}
                 <CardContent>
                   <Typography
                     gutterBottom

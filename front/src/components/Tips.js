@@ -3,24 +3,21 @@ import Grid from "@material-ui/core/Grid";
 import {
   Card,
   CardActionArea,
-  CardMedia,
   Typography,
   CardContent,
   Fab,
   Button,
   TextField,
-  Link,
-  ButtonBase,
-  Container,
-  CircularProgress
+
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
+import FullscreenIcon from '@material-ui/icons/Fullscreen';
+import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Slide from "@material-ui/core/Slide";
-import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/styles";
 import firebase from "firebase";
 
@@ -66,37 +63,40 @@ const styles = theme => ({
     color: "none"
   },
   tipText: {},
-  editor: {
-    height: 500
+  dialog: {
+    minWidth: "70vh",
+    maxWidth: "70vh"
   }
 });
 
 const Transition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} />;
-  });
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 class Tips extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { open: false, name: "", text: "", tips: [] };
+    this.state = { open: false, name: "", text: "", tips: [], isDialogFullScreen: false, gameId: this.props.match.params.id };
+    console.log(this.state.gameId);
     this.publishToFirestore = this.publishToFirestore.bind(this);
     this.fetchTips = this.fetchTips.bind(this);
     this.handleClose = this.handleClose.bind(this);
+    this.handleClickNotFullscreen = this.handleClickNotFullscreen.bind(this);
   }
 
   publishToFirestore() {
     const db = firebase.firestore();
-    const tipRef = db
+    db
       .collection("tips")
       .add({
         gameId: this.props.match.params.id,
         name: this.state.name,
         text: this.state.text
       })
-      .then(function() {
+      .then(function () {
         console.log("Tips Successfully added");
       })
-      .catch(function(error) {
+      .catch(function (error) {
         console.error("Error writing document: ", error);
       });
     this.handleClose();
@@ -112,7 +112,6 @@ class Tips extends React.Component {
         const data = querySnapshot.docs.map(doc => {
           return { id: doc.id, data: doc.data() };
         });
-        console.log(data);
         this.setState({ tips: data });
       });
   }
@@ -120,12 +119,22 @@ class Tips extends React.Component {
   componentDidMount() {
     this.fetchTips();
   }
+
   handleClickOpen = () => {
     this.setState({ open: true });
   };
 
   handleClose = () => {
     this.setState({ open: false });
+  };
+
+  handleClickFullscreen = () => {
+    this.setState({ isDialogFullScreen: true });
+
+  };
+
+  handleClickNotFullscreen = () => {
+    this.setState({ isDialogFullScreen: false });
   };
 
   changeName = event => {
@@ -141,8 +150,8 @@ class Tips extends React.Component {
   };
 
   render() {
-    const { gameId, classes } = this.props;
-    const { tips, text } = this.state;
+    const { classes } = this.props;
+    const { tips, text, isDialogFullScreen } = this.state;
     var renderTips = tips.map(tip => (
       <Grid key={tip.id} xs={3} item>
         <Card className={classes.card}>
@@ -179,59 +188,60 @@ class Tips extends React.Component {
         <Fab aria-label="add" className={classes.floatingActionButton}>
           <AddIcon onClick={this.handleClickOpen} />
         </Fab>
-        <Dialog
-          open={this.state.open}
-          TransitionComponent={Transition}
-          keepMounted
-          onClose={this.handleClose}
-          aria-labelledby="alert-dialog-slide-title"
-          aria-describedby="alert-dialog-slide-description"
-        >
-          <DialogTitle id="alert-dialog-slide-title">
-            {"Créer une astuce"}
-          </DialogTitle>
-          <DialogContent>
-            <form noValidate autoComplete="off">
-              <TextField
-                id="tip-name"
-                className={classes.textField}
-                label="Nom de l'astuce"
-                onChange={this.changeName}
-              />
-              <p></p>
-              <div>
-              <CKEditor
-                    editor={ ClassicEditor }
-                    data="<p>Hello from CKEditor 5!</p>"
-                    onInit={ editor => {
-                        // You can store the "editor" and use when it is needed.
-                        console.log( 'Editor is ready to use!', editor );
-                    } }
-                    onChange={ ( event, editor ) => {
-                        const data = editor.getData();
-                        console.log( { event, editor, data } );
-                    } }
-                    onBlur={ ( event, editor ) => {
-                        console.log( 'Blur.', editor );
-                    } }
-                    onFocus={ ( event, editor ) => {
-                        console.log( 'Focus.', editor );
-                    } }
-                />
-              </div>
-            </form>
-          </DialogContent>
+        <div>
+          <Dialog
+            open={this.state.open}
+            TransitionComponent={Transition}
+            fullWidth
+            fullScreen={isDialogFullScreen}
+            onClose={this.handleClose}
+          >
+            <DialogTitle id="alert-dialog-slide-title">
+              {"Créer une astuce"}
+              {isDialogFullScreen ?
+                <Button onClick={this.handleClickNotFullscreen}><FullscreenExitIcon /></Button> :
+                <Button onClick={this.handleClickFullscreen}><FullscreenIcon /></Button>
+              }
+            </DialogTitle>
 
-          <DialogActions>
-            <Button onClick={this.publishToFirestore} color="primary">
-              Créer
+            <DialogContent>
+              <form noValidate autoComplete="off">
+                <TextField
+                  id="tip-name"
+                  className={classes.textField}
+                  label="Nom de l'astuce"
+                  onChange={this.changeName}
+                />
+                <p></p>
+                <div>
+                  <CKEditor
+                    editor={ClassicEditor}
+                    data="<p>Hello from CKEditor 5!</p>"
+                    onInit={editor => {
+                      // You can store the "editor" and use when it is needed.
+                    }}
+                    onChange={(event, editor) => {
+                      this.setState({
+                        text: editor.getData()
+                      });
+                      console.log(text);
+                    }}
+                  />
+                </div>
+              </form>
+            </DialogContent>
+
+            <DialogActions>
+              <Button onClick={this.publishToFirestore} color="primary">
+                Créer
             </Button>
-            <Button onClick={this.handleClose} color="primary">
-              Annuler
+              <Button onClick={this.handleClose} color="primary">
+                Annuler
             </Button>
-          </DialogActions>
-        </Dialog>
-      </React.Fragment>
+            </DialogActions>
+          </Dialog>
+        </div >
+      </React.Fragment >
     );
   }
 }

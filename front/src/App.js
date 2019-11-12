@@ -9,7 +9,6 @@ import AcUnitIcon from "@material-ui/icons/AcUnit";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import FoldersPage from "./components/FoldersPage";
 import { Button } from "@material-ui/core";
-import HomePage from "./components/HomePage";
 import Tips from "./components/Tips";
 
 const useStyles = makeStyles(theme => ({
