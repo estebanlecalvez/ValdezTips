@@ -1,5 +1,6 @@
 import React from "react";
 import Grid from "@material-ui/core/Grid";
+import KeyboardReturnIcon from '@material-ui/icons/KeyboardReturn';
 import {
   Card,
   CardActionArea,
@@ -67,7 +68,12 @@ const styles = theme => ({
   },
   dialog: {
     minHeight: "50vh"
-  }
+  },
+  backFAB: {
+    top: 80,
+    left: 20,
+    position: "fixed",
+  },
 });
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -165,6 +171,11 @@ class Tips extends React.Component {
     this.props.history.push(path);
   }
 
+  back() {
+    let path = `/`;
+    this.props.history.push(path);
+  }
+
   render() {
     const { classes } = this.props;
     const { charging } = this.state;
@@ -215,7 +226,11 @@ class Tips extends React.Component {
     ));
     return (
       <React.Fragment>
+        <Fab aria-label="back" className={classes.backFAB}>
+          <KeyboardReturnIcon onClick={() => { this.back(); }} />
+        </Fab>
         <div className={classes.pageContent}>
+
           {charging ? <CenteredCircularProgress /> :
 
             <Grid container className={classes.root} spacing={2}>

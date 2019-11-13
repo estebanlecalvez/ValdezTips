@@ -3,12 +3,12 @@ import { withStyles } from "@material-ui/styles";
 import firebase from "firebase";
 import DeleteIcon from '@material-ui/icons/Delete';
 import CreateIcon from '@material-ui/icons/Create';
-import { Typography, Container, CircularProgress, Fab, Dialog, DialogContent, DialogTitle, Button, DialogActions, TextField } from "@material-ui/core";
+import { Typography, Container, CircularProgress, Fab, Dialog, DialogContent, DialogTitle, Button, DialogActions, TextField, Card, CardContent } from "@material-ui/core";
 import FullscreenIcon from '@material-ui/icons/Fullscreen';
 import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
 import ReactQuill from "react-quill";
 import CenteredCircularProgress from "../utilsComponents/CenteredCircularProgress";
-
+import KeyboardReturnIcon from '@material-ui/icons/KeyboardReturn';
 const styles = theme => ({
   pageContent: {
     margin: 100
@@ -23,6 +23,11 @@ const styles = theme => ({
       backgroundColor: "darkRed",
       color: "lightGrey"
     }
+  },
+  backFAB: {
+    top: 80,
+    left: 20,
+    position: "fixed",
   },
   floatingActionButtonTop: {
     top: 80,
@@ -61,6 +66,11 @@ class Tip extends React.Component {
 
   handleClickCloseModification() {
     this.setState({ openModification: false });
+  }
+
+  back() {
+    let path = `/folders/` + this.state.tip.gameId;
+    this.props.history.push(path);
   }
 
   fetchTip() {
@@ -140,7 +150,6 @@ class Tip extends React.Component {
 
   render() {
     const { classes } = this.props;
-
     const { tip, charging, isDialogFullScreen, newname, newtext, newdesc } = this.state;
     const modules = {
       toolbar: [
@@ -160,18 +169,27 @@ class Tip extends React.Component {
     ];
     return (
       <React.Fragment>
+
         <div className={classes.pageContent}>
+
           {charging ? <CenteredCircularProgress /> : (
             <React.Fragment>
-              <h1>
-                {tip.name}
-              </h1>
-              <div dangerouslySetInnerHTML={{ __html: "<Typography>" + tip.text + "</Typography>" }}></div>
+              <Card elevation={10} >
+                <CardContent>
+                  <h1>
+                    {tip.name}
+                  </h1>
+                  <div dangerouslySetInnerHTML={{ __html: "<Typography>" + tip.text + "</Typography>" }}></div>
+                </CardContent>
+              </Card>
               <Fab aria-label="delete" className={classes.floatingActionButton}>
                 <DeleteIcon onClick={this.handleClickOpenDeletion} />
               </Fab>
               <Fab aria-label="modification" className={classes.floatingActionButtonTop}>
                 <CreateIcon onClick={this.handleClickOpenModification} />
+              </Fab>
+              <Fab aria-label="back" className={classes.backFAB}>
+                <KeyboardReturnIcon onClick={() => { this.back(); }} />
               </Fab>
             </React.Fragment>
           )
