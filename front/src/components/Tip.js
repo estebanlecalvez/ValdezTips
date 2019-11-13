@@ -11,7 +11,11 @@ import CenteredCircularProgress from "../utilsComponents/CenteredCircularProgres
 import KeyboardReturnIcon from '@material-ui/icons/KeyboardReturn';
 const styles = theme => ({
   pageContent: {
-    margin: 100
+    margin: 100,
+  },
+  card: {
+    borderRadius: "1em",
+    padding: "5em"
   },
   floatingActionButton: {
     bottom: 20,
@@ -174,7 +178,7 @@ class Tip extends React.Component {
 
           {charging ? <CenteredCircularProgress /> : (
             <React.Fragment>
-              <Card elevation={10} >
+              <Card elevation={10} className={classes.card} >
                 <CardContent>
                   <h1>
                     {tip.name}
