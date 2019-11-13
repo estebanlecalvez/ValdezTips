@@ -165,7 +165,7 @@ class FoldersPage extends React.Component {
     const { classes } = this.props;
     var { folders, charging, file, image, name, selectImage } = this.state;
     var renderFolders = folders.map(folder => (
-      <Grid key={folder.id} xs={3} item>
+      <Grid key={folder.id} xs={"auto"} item>
         <Card
           className={classes.card}
           onClick={() => this.goIntoFolder(folder.id)}
@@ -200,9 +200,9 @@ class FoldersPage extends React.Component {
       <React.Fragment>
         <div className={classes.pageContent}>
           {charging ? <CenteredCircularProgress /> :
-            <Grid container className={classes.root} spacing={2}>
-              <Grid item xs={12}>
-                <Grid container spacing={3}>
+            <Grid container className={classes.root} >
+            <Grid>
+              <Grid container spacing={5}>
                   {renderFolders}
                 </Grid>
               </Grid>

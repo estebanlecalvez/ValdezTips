@@ -198,7 +198,7 @@ class Tips extends React.Component {
     ];
     const { tips, text, isDialogFullScreen } = this.state;
     var renderTips = tips.map(tip => (
-      <Grid key={tip.id} xs={3} item>
+      <Grid key={tip.id}xs={"auto"} item>
         <Card
           className={classes.card}
           onClick={() => this.goIntoTip(tip.id)}
@@ -233,9 +233,9 @@ class Tips extends React.Component {
 
           {charging ? <CenteredCircularProgress /> :
 
-            <Grid container className={classes.root} spacing={2}>
-              <Grid item xs={12}>
-                <Grid container spacing={1}>
+            <Grid container className={classes.root} >
+              <Grid>
+                <Grid container spacing={5}>
                   {renderTips}
                 </Grid>
               </Grid>
