@@ -24,6 +24,7 @@ import { withStyles } from "@material-ui/styles";
 import firebase from "firebase";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import CenteredCircularProgress from "../utilsComponents/CenteredCircularProgress";
 
 const styles = theme => ({
   root: {
@@ -215,11 +216,11 @@ class Tips extends React.Component {
     return (
       <React.Fragment>
         <div className={classes.pageContent}>
-          {charging ? <CircularProgress /> :
+          {charging ? <CenteredCircularProgress /> :
 
             <Grid container className={classes.root} spacing={2}>
               <Grid item xs={12}>
-                <Grid container spacing={3}>
+                <Grid container spacing={1}>
                   {renderTips}
                 </Grid>
               </Grid>

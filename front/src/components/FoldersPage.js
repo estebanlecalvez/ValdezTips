@@ -22,6 +22,7 @@ import Slide from "@material-ui/core/Slide";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/styles";
 import firebase from "firebase";
+import CenteredCircularProgress from "../utilsComponents/CenteredCircularProgress";
 
 const styles = theme => ({
   root: {
@@ -155,7 +156,7 @@ class FoldersPage extends React.Component {
                 title={folder.data.name + " image."}
               />
             ) : (
-                <CircularProgress color="secondary" />
+                <CenteredCircularProgress />
               )}
             <CardContent>
               <Typography
@@ -174,7 +175,7 @@ class FoldersPage extends React.Component {
     return (
       <React.Fragment>
         <div className={classes.pageContent}>
-          {charging ? <CircularProgress /> :
+          {charging ? <CenteredCircularProgress /> :
             <Grid container className={classes.root} spacing={2}>
               <Grid item xs={12}>
                 <Grid container spacing={3}>

@@ -7,6 +7,7 @@ import { Typography, Container, CircularProgress, Fab, Dialog, DialogContent, Di
 import FullscreenIcon from '@material-ui/icons/Fullscreen';
 import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
 import ReactQuill from "react-quill";
+import CenteredCircularProgress from "../utilsComponents/CenteredCircularProgress";
 
 const styles = theme => ({
   pageContent: {
@@ -160,7 +161,7 @@ class Tip extends React.Component {
     return (
       <React.Fragment>
         <div className={classes.pageContent}>
-          {charging ? <CircularProgress /> : (
+          {charging ? <CenteredCircularProgress /> : (
             <React.Fragment>
               <h1>
                 {tip.name}
