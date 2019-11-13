@@ -1,5 +1,7 @@
 import React from "react";
 import Grid from "@material-ui/core/Grid";
+import CreateIcon from '@material-ui/icons/Create';
+
 import { withRouter } from "react-router-dom";
 import {
   Card,
@@ -60,12 +62,22 @@ const styles = theme => ({
       color: "lightGrey"
     }
   },
+  fabOnImage: {
+    top: 10,
+    left: 250,
+    color: "white",
+    backgroundColor: "green",
+    "&:hover": {
+      backgroundColor: "darkGreen",
+      color: "lightGrey"
+    }
+  },
   textField: {
     width: "20vw"
   },
   linkCard: {
     color: "none"
-  }
+  },
 });
 const cropper = React.createRef(null);
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -74,7 +86,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 class FoldersPage extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { image: "", name: "", open: false, folders: [], charging: true, file: null, cropFile: false };
+    this.state = { image: "", name: "", open: false, folders: [], charging: true, file: null, cropFile: false, selectImage: true };
     this.publishToFirestore = this.publishToFirestore.bind(this);
     this.handleClose = this.handleClose.bind(this);
     this.fetchFolders = this.fetchFolders.bind(this);
@@ -151,7 +163,7 @@ class FoldersPage extends React.Component {
 
   render() {
     const { classes } = this.props;
-    var { folders, charging, file, image, name } = this.state;
+    var { folders, charging, file, image, name, selectImage } = this.state;
     var renderFolders = folders.map(folder => (
       <Grid key={folder.id} xs={3} item>
         <Card
@@ -226,43 +238,46 @@ class FoldersPage extends React.Component {
                 label="Image du dossier"
                 onChange={this.changeImage}
               /> */}
-              {image ? null :
-
-                <ImageSelectPreview
-
-                  onChange={data => {
-                    console.log(data);
-                    this.setState({
-                      image: data[0].content
-                    });
-                  }} />
+              {selectImage ? <ImageSelectPreview
+                onChange={data => {
+                  console.log(data);
+                  this.setState({
+                    image: data[0].content,
+                    selectImage: false
+                  });
+                }} /> :
+                null
               }
-
             </form>
           </DialogContent>
-          {image && name ? (
+          {image || name ? (
             <Container>
               <Card className={classes.card}>
-                <CardActionArea>
-                  <CardMedia
-                    src=""
-                    children=""
-                    className={classes.media}
-                    image={image}
-                    title={name + " image."}
-                  />
+                <CardMedia
+                  src=""
+                  children=""
+                  className={classes.media}
+                  image={image}
+                  title={name + " image."}
+                  children={image ? <Fab aria-label="modify_picture" className={classes.fabOnImage} size="small">
+                    <CreateIcon onClick={() => {
+                      this.setState({
+                        selectImage: true,
+                      });
+                    }} />
+                  </Fab> : null}
+                />
 
-                  <CardContent>
-                    <Typography
-                      gutterBottom
-                      variant="h5"
-                      component="h2"
-                      className={classes.cardTitle}
-                    >
-                      {name}
-                    </Typography>
-                  </CardContent>
-                </CardActionArea>
+                <CardContent>
+                  <Typography
+                    gutterBottom
+                    variant="h5"
+                    component="h2"
+                    className={classes.cardTitle}
+                  >
+                    {name}
+                  </Typography>
+                </CardContent>
               </Card>
             </Container>
           ) : null}
