@@ -23,6 +23,10 @@ import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/styles";
 import firebase from "firebase";
 import CenteredCircularProgress from "../utilsComponents/CenteredCircularProgress";
+import Cropper from 'react-cropper';
+import 'cropperjs/dist/cropper.css';
+
+import ImageSelectPreview from 'react-image-select-pv';
 
 const styles = theme => ({
   root: {
@@ -63,15 +67,16 @@ const styles = theme => ({
     color: "none"
   }
 });
-
+const cropper = React.createRef(null);
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 class FoldersPage extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { image: "", name: "", open: false, folders: [], charging: true };
+    this.state = { image: "", name: "", open: false, folders: [], charging: true, file: null, cropFile: false };
     this.publishToFirestore = this.publishToFirestore.bind(this);
+    this.handleClose = this.handleClose.bind(this);
     this.fetchFolders = this.fetchFolders.bind(this);
   }
 
@@ -105,12 +110,12 @@ class FoldersPage extends React.Component {
       })
       .then(function () {
         console.log("Folders Successfully added");
-        this.handleClose();
-        this.fetchFolders();
       })
       .catch(function (error) {
         console.error("Error writing document: ", error);
       });
+    this.handleClose();
+    this.fetchFolders();
   }
 
   fetchFolders() {
@@ -137,9 +142,16 @@ class FoldersPage extends React.Component {
     this.props.history.push(path);
   }
 
+
+  _crop() {
+    // image in dataUrl
+    console.log(this.state.file);
+    console.log(this.refs.cropper.getCroppedCanvas().toDataURL());
+  }
+
   render() {
     const { classes } = this.props;
-    var { folders, charging } = this.state;
+    var { folders, charging, file, image, name } = this.state;
     var renderFolders = folders.map(folder => (
       <Grid key={folder.id} xs={3} item>
         <Card
@@ -208,47 +220,52 @@ class FoldersPage extends React.Component {
                 onChange={this.changeName}
               />
               <p></p>
-              <TextField
+              {/* <TextField
                 id="folder-image"
                 className={classes.textField}
                 label="Image du dossier"
                 onChange={this.changeImage}
-              />
+              /> */}
+              {image ? null :
+
+                <ImageSelectPreview
+
+                  onChange={data => {
+                    console.log(data);
+                    this.setState({
+                      image: data[0].content
+                    });
+                  }} />
+              }
+
             </form>
           </DialogContent>
-          <Container>
-            <Card className={classes.card}>
-              <CardActionArea>
-                {this.state.image ? (
+          {image && name ? (
+            <Container>
+              <Card className={classes.card}>
+                <CardActionArea>
                   <CardMedia
                     src=""
                     children=""
                     className={classes.media}
-                    image={this.state.image}
-                    title={this.state.name + " image."}
+                    image={image}
+                    title={name + " image."}
                   />
-                ) : (
-                    <CardMedia
-                      src=""
-                      children=""
-                      className={classes.media}
-                      image="https://image.shutterstock.com/image-vector/picture-vector-icon-no-image-260nw-1350441335.jpg"
-                      title={this.state.name + " image."}
-                    />
-                  )}
-                <CardContent>
-                  <Typography
-                    gutterBottom
-                    variant="h5"
-                    component="h2"
-                    className={classes.cardTitle}
-                  >
-                    {this.state.name}
-                  </Typography>
-                </CardContent>
-              </CardActionArea>
-            </Card>
-          </Container>
+
+                  <CardContent>
+                    <Typography
+                      gutterBottom
+                      variant="h5"
+                      component="h2"
+                      className={classes.cardTitle}
+                    >
+                      {name}
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            </Container>
+          ) : null}
 
           <DialogActions>
             <Button onClick={this.publishToFirestore} color="primary">
