@@ -35,7 +35,7 @@ const styles = theme => ({
     flexGrow: 1
   },
   pageContent: {
-    margin: 100
+    margin: "5vh"
   },
   paper: {
     height: 140,
@@ -43,7 +43,10 @@ const styles = theme => ({
   },
 
   card: {
-    width: 300
+    minWidth: 50,
+    maxHeight: 200,
+    width: 300,
+    maxWidth: "90vw"
   },
   media: {
     height: 140
@@ -201,8 +204,8 @@ class FoldersPage extends React.Component {
         <div className={classes.pageContent}>
           {charging ? <CenteredCircularProgress /> :
             <Grid container className={classes.root} >
-            <Grid>
-              <Grid container spacing={5}>
+              <Grid>
+                <Grid container spacing={5}>
                   {renderFolders}
                 </Grid>
               </Grid>

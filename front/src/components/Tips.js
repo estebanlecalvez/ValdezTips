@@ -11,6 +11,7 @@ import {
   TextField,
   CircularProgress,
   CardActions,
+  IconButton,
 
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
@@ -32,16 +33,23 @@ const styles = theme => ({
     flexGrow: 1
   },
   pageContent: {
-    margin: 100
+    marginTop: 10,
+    marginLeft: "5vw",
+    marginRight: "5vw",
+    marginBottom: 10,
+    "& img": {
+      maxWidth: "80vw"
+    }
   },
   paper: {
     height: 140,
     width: 100
   },
-
   card: {
+    minWidth: 50,
+    maxHeight: 200,
     width: 300,
-    maxHeight: 200
+    maxWidth: "90vw"
   },
   media: {
     height: 140
@@ -70,9 +78,9 @@ const styles = theme => ({
     minHeight: "50vh"
   },
   backFAB: {
-    top: 80,
-    left: 20,
-    position: "fixed",
+    marginBottom: 10,
+    cursor: 'pointer',
+    color: "blue",
   },
 });
 
@@ -196,9 +204,9 @@ class Tips extends React.Component {
       'list', 'bullet', 'indent',
       'link', 'image'
     ];
-    const { tips, text, isDialogFullScreen } = this.state;
+    const { tips, isDialogFullScreen } = this.state;
     var renderTips = tips.map(tip => (
-      <Grid key={tip.id}xs={"auto"} item>
+      <Grid key={tip.id} xs={"auto"} item>
         <Card
           className={classes.card}
           onClick={() => this.goIntoTip(tip.id)}
@@ -226,13 +234,9 @@ class Tips extends React.Component {
     ));
     return (
       <React.Fragment>
-        <Fab aria-label="back" className={classes.backFAB}>
-          <KeyboardReturnIcon onClick={() => { this.back(); }} />
-        </Fab>
         <div className={classes.pageContent}>
-
+          <KeyboardReturnIcon className={classes.backFAB} onClick={() => { this.back(); }} />
           {charging ? <CenteredCircularProgress /> :
-
             <Grid container className={classes.root} >
               <Grid>
                 <Grid container spacing={5}>

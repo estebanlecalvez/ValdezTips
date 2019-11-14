@@ -3,7 +3,7 @@ import { withStyles } from "@material-ui/styles";
 import firebase from "firebase";
 import DeleteIcon from '@material-ui/icons/Delete';
 import CreateIcon from '@material-ui/icons/Create';
-import { Typography, Container, CircularProgress, Fab, Dialog, DialogContent, DialogTitle, Button, DialogActions, TextField, Card, CardContent } from "@material-ui/core";
+import { Typography, Container, CircularProgress, Fab, Dialog, DialogContent, DialogTitle, Button, DialogActions, TextField, Card, CardContent, CardActions } from "@material-ui/core";
 import FullscreenIcon from '@material-ui/icons/Fullscreen';
 import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
 import ReactQuill from "react-quill";
@@ -11,39 +11,46 @@ import CenteredCircularProgress from "../utilsComponents/CenteredCircularProgres
 import KeyboardReturnIcon from '@material-ui/icons/KeyboardReturn';
 const styles = theme => ({
   pageContent: {
-    margin: 100,
+    marginTop: 10,
+    marginLeft: "5vw",
+    marginRight: "5vw",
+    marginBottom: 10,
+    "& img": {
+      maxWidth: "80vw"
+    }
   },
-  card: {
-    borderRadius: "1em",
-    padding: "5em"
+  paper: {
+    height: 140,
+    width: 100
   },
   floatingActionButton: {
-    bottom: 20,
-    right: 20,
-    position: "fixed",
-    color: "white",
-    backgroundColor: "red",
-    "&:hover": {
-      backgroundColor: "darkRed",
-      color: "lightGrey"
-    }
+    cursor: 'pointer',
+    color: "red",
   },
   backFAB: {
-    top: 80,
-    left: 20,
-    position: "fixed",
+    cursor: 'pointer',
+    color: "blue",
   },
   floatingActionButtonTop: {
-    top: 80,
-    right: 20,
-    position: "fixed",
-    color: "white",
-    backgroundColor: "green",
-    "&:hover": {
-      backgroundColor: "darkGreen",
-      color: "lightGrey"
-    }
+    cursor: 'pointer',
+    color: "green",
   },
+  modifyBtnContainer: {
+    align: "right",
+    float: "right",
+    width: 25,
+    height: 25,
+    marginTop: 10,
+    marginRight: 10
+  },
+  deleteBtnContainer: {
+    align: "right",
+    float: "right",
+    width: 25,
+    height: 25,
+    marginBottom: 10,
+    marginRight: 10
+  }
 });
 
 class Tip extends React.Component {
@@ -178,23 +185,23 @@ class Tip extends React.Component {
 
           {charging ? <CenteredCircularProgress /> : (
             <React.Fragment>
-              <Card elevation={10} className={classes.card} >
+
+              <KeyboardReturnIcon className={classes.backFAB} onClick={() => { this.back(); }} />
+              <Card elevation={5} className={classes.card} >
+                <Container className={classes.modifyBtnContainer}>
+                  <CreateIcon className={classes.floatingActionButtonTop} onClick={this.handleClickOpenModification} />
+                </Container>
                 <CardContent>
-                  <h1>
+                  <h3>
                     {tip.name}
-                  </h1>
-                  <div dangerouslySetInnerHTML={{ __html: "<Typography>" + tip.text + "</Typography>" }}></div>
+                  </h3>
+                  <div dangerouslySetInnerHTML={{ __html: tip.text }}></div>
                 </CardContent>
+                <Container className={classes.deleteBtnContainer}>
+                  <DeleteIcon className={classes.floatingActionButton} onClick={this.handleClickOpenDeletion} />
+                </Container>
               </Card>
-              <Fab aria-label="delete" className={classes.floatingActionButton}>
-                <DeleteIcon onClick={this.handleClickOpenDeletion} />
-              </Fab>
-              <Fab aria-label="modification" className={classes.floatingActionButtonTop}>
-                <CreateIcon onClick={this.handleClickOpenModification} />
-              </Fab>
-              <Fab aria-label="back" className={classes.backFAB}>
-                <KeyboardReturnIcon onClick={() => { this.back(); }} />
-              </Fab>
+
             </React.Fragment>
           )
           }
@@ -258,6 +265,7 @@ class Tip extends React.Component {
                   formats={formats}
                   value={newtext}
                   onChange={(value) => {
+                    console.log(value)
                     this.setState({ newtext: value });
                   }}>
                 </ReactQuill>
