@@ -3,12 +3,15 @@ import { withStyles } from "@material-ui/styles";
 import firebase from "firebase";
 import DeleteIcon from '@material-ui/icons/Delete';
 import CreateIcon from '@material-ui/icons/Create';
-import { Typography, Container, CircularProgress, Fab, Dialog, DialogContent, DialogTitle, Button, DialogActions, TextField, Card, CardContent, CardActions } from "@material-ui/core";
+import { Typography, Container, CircularProgress, Fab, Dialog, DialogContent, DialogTitle, Button, DialogActions, TextField, Card, CardContent, CardActions, IconButton, CardHeader, Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem } from "@material-ui/core";
 import FullscreenIcon from '@material-ui/icons/Fullscreen';
 import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
 import ReactQuill from "react-quill";
 import CenteredCircularProgress from "../utilsComponents/CenteredCircularProgress";
 import KeyboardReturnIcon from '@material-ui/icons/KeyboardReturn';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import moment from "moment";
+
 const styles = theme => ({
   pageContent: {
     marginTop: 10,
@@ -16,7 +19,18 @@ const styles = theme => ({
     marginRight: "5vw",
     marginBottom: 10,
     "& img": {
-      maxWidth: "80vw"
+      maxWidth: "40vw",
+      maxHeight: "40vh",
+      display: "block",
+      marginLeft: "auto",
+      marginRight: "auto",
+      transition: "0.3s",
+      "&:hover": {
+        height: "auto",
+        maxHeight: "95vh",
+        maxWidth: "80vw",
+        width: "auto"
+      }
     }
   },
   paper: {
@@ -50,15 +64,20 @@ const styles = theme => ({
     height: 25,
     marginBottom: 10,
     marginRight: 10
+  },
+  tipTitle: {
+    fontSize: "20px",
+    textAlign: "center"
   }
 });
 
 class Tip extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { tip: {}, isDialogFullScreen: false, charging: true, openModification: false, openDeletion: false, newname: "", newdesc: "", newtext: "" };
+    this.state = { tip: {}, isDialogFullScreen: false, charging: true, openModification: false, isMenuOpen: false, openDeletion: false, newname: "", newdesc: "", newtext: "" };
     this.fetchTip = this.fetchTip.bind(this);
     this.deleteTip = this.deleteTip.bind(this);
+    this.inputRef = null;
     this.modifyTip = this.modifyTip.bind(this);
     this.handleClickOpenModification = this.handleClickOpenModification.bind(this);
     this.handleClickCloseModification = this.handleClickCloseModification.bind(this);
@@ -92,6 +111,7 @@ class Tip extends React.Component {
     docRef.get().then(doc => {
       if (doc.exists) {
         currentTip = doc.data();
+        console.log(currentTip);
         this.setState({
           tip: currentTip,
           newtext: currentTip.text,
@@ -159,9 +179,29 @@ class Tip extends React.Component {
     });
   };
 
+  handleListKeyDown(event) {
+    if (event.key === 'Tab') {
+      event.preventDefault();
+      this.setState({ isMenuOpen: false });
+    }
+  }
+
+  formatDate(seconds) {
+    var t = new Date(1970, 0, 1); // Epoch
+    t.setSeconds(seconds);
+    var formattedTimestamp = Intl.DateTimeFormat('fr-FR', {
+      year: "numeric",
+      month: "long",
+      day: "2-digit",
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(t);
+    return formattedTimestamp;
+  }
+
   render() {
     const { classes } = this.props;
-    const { tip, charging, isDialogFullScreen, newname, newtext, newdesc } = this.state;
+    const { tip, charging, isDialogFullScreen, newname, newtext, newdesc, isMenuOpen } = this.state;
     const modules = {
       toolbar: [
         [{ 'header': [1, 2, false] }],
@@ -188,17 +228,52 @@ class Tip extends React.Component {
 
               <KeyboardReturnIcon className={classes.backFAB} onClick={() => { this.back(); }} />
               <Card elevation={5} className={classes.card} >
+                <CardHeader
+                  action={
+                    <IconButton aria-label="settings"
+                      onClick={() => { this.setState({ isMenuOpen: !isMenuOpen }) }}>
+                      <MoreVertIcon ref={inputRef => { this.inputRef = inputRef }}
+                        aria-controls={isMenuOpen ? 'menu-list-grow' : undefined}
+                        aria-haspopup="true"
+                      />
+                    </IconButton>
+                  }
+                  title={tip.name}
+                  subheader={"Créé le: " + this.formatDate(tip.createdOn.seconds)}
+                />
+                <div>
+                  <Popper open={isMenuOpen} anchorEl={this.inputRef} role={undefined} transition disablePortal>
+                    {({ TransitionProps, placement }) => (
+                      <Grow
+                        {...TransitionProps}
+                        style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}
+                      >
+                        <Paper>
+                          <ClickAwayListener onClickAway={() => {
+                            this.setState({
+                              isMenuOpen: false
+                            });
+                          }}>
+                            <MenuList autoFocusItem={isMenuOpen} id="menu-list-grow" onKeyDown={(event) => { this.handleListKeyDown(event); }}>
+                              <MenuItem onClick={this.handleClickOpenModification} style={{ color: "darkGreen" }} >
+                                <a>Modifier</a>
+                              </MenuItem>
+                              <MenuItem onClick={this.handleClickOpenDeletion} style={{ color: "darkRed" }} >
+                                <a>Supprimer</a>
+                              </MenuItem>
+                            </MenuList>
+                          </ClickAwayListener>
+                        </Paper>
+                      </Grow>
+                    )}
+                  </Popper>
+                </div>
                 <Container className={classes.modifyBtnContainer}>
-                  <CreateIcon className={classes.floatingActionButtonTop} onClick={this.handleClickOpenModification} />
                 </Container>
                 <CardContent>
-                  <h3>
-                    {tip.name}
-                  </h3>
                   <div dangerouslySetInnerHTML={{ __html: tip.text }}></div>
                 </CardContent>
                 <Container className={classes.deleteBtnContainer}>
-                  <DeleteIcon className={classes.floatingActionButton} onClick={this.handleClickOpenDeletion} />
                 </Container>
               </Card>
 
@@ -285,7 +360,7 @@ class Tip extends React.Component {
             }
           </Dialog>
         </div>
-      </React.Fragment>
+      </React.Fragment >
     );
   }
 }

@@ -109,7 +109,7 @@ class Tips extends React.Component {
         description: this.state.description,
         text: this.state.text,
         createdOn: new Date(),
-        lastModifiedOn: new Date()
+        lastModifiedOn: null
       })
       .then(function () {
         this.handleClose();

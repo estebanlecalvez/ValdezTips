@@ -4,7 +4,7 @@ import React from "react";
 
 const styles = theme => ({
     centeredCircularProgress: {
-        color: 'green'
+        color: 'darkBlue'
     }
 });
 
