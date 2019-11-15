@@ -1,9 +1,9 @@
 import React from "react";
 import { Card, Button, CardHeader, CardContent, CardActions, Grid, TextField } from "@material-ui/core";
 import { fade, makeStyles, withStyles } from "@material-ui/core/styles";
+import firebase from "firebase";
 
 const styles = theme => ({
-
     card: {
         padding: 20,
         paddingTop: 50,
@@ -16,23 +16,46 @@ class Login extends React.Component {
         this.signIn = this.signIn.bind(this);
         this.state = {
             isLoginForm: true,
+            error: null,
             email: { value: null, error: false, helperText: null },
             password: { value: null, error: false, helperText: null }
         };
     }
 
     signIn(e) {
-        if (this.emailInput.value === "") {
-            this.setState({
-                email: {
-                    value: this.emailInput.value,
-                    error: true,
-                    helperText: "Your email must be specified."
-                }
-            });
-            this.emailInput.focus();
-        }
         e.preventDefault();
+        const { email, password } = this.state;
+        const firebaseAuth = firebase.auth();
+        const db = firebase.firestore();
+        const isLoggedIn = true;
+        if (!isLoggedIn && email && password) {
+            firebaseAuth.signInWithEmailAndPassword(email.value, password.value).then((response) => {
+                console.log(response);
+            }).catch((error) => {
+                this.setState({ error: error.message });
+            })
+        }
+        if (isLoggedIn) {
+            this.props.history.push("/folders")
+        }
+
+    }
+
+    register(e) {
+        e.preventDefault();
+        const { email, password } = this.state;
+        const firebaseAuth = firebase.auth();
+        if (email && password) {
+            firebaseAuth.createUserWithEmailAndPassword(email.value, password.value).then((response) => {
+                console.log(response);
+                this.setState({
+                    isLoginForm: true,
+                })
+            }).catch((error) => {
+                console.log(error);
+                this.setState({ error: error.message });
+            });
+        }
     }
 
     render() {
@@ -47,7 +70,13 @@ class Login extends React.Component {
                         fullWidth
                         autoFocus
                         required
-                        inputRef={input => (this.emailInput = input)}
+                        onChange={(event) => {
+                            event.preventDefault();
+                            this.setState({
+                                email: { value: event.target.value, error: "", helperText: "" }
+                            })
+                            console.log(this.state.email);
+                        }}
                         error={this.state.email.error}
                         helperText={this.state.email.helperText}
                     />
@@ -56,13 +85,20 @@ class Login extends React.Component {
                         fullWidth
                         required
                         type="password"
-                        inputRef={input => (this.passwordInput = input)}
-                    />
-                    <p></p>
+                        onChange={(event) => {
+                            event.preventDefault();
+                            this.setState({
+                                password: { value: event.target.value, error: "", helperText: "" }
+                            })
+                            console.log(this.state.password);
+                        }} />
+                    <p>{this.state.error}</p>
                 </CardContent>
                 <CardActions style={{ justifyContent: "space-between" }}>
                     <Button onClick={() => {
                         this.setState({
+                            error: "",
+
                             isLoginForm: false
                         })
                     }}>Vous n'avez pas de compte?</Button>
@@ -73,7 +109,7 @@ class Login extends React.Component {
             </form>
             ;
         const inscriptionForm =
-            <form onSubmit={this.signIn.bind(this)}>
+            <form onSubmit={this.register.bind(this)}>
                 <CardHeader title="Inscription" className={classes.headerConnexionForm} />
                 <CardContent>
                     <TextField
@@ -81,7 +117,13 @@ class Login extends React.Component {
                         fullWidth
                         autoFocus
                         required
-                        inputRef={input => (this.emailInput = input)}
+                        onChange={(event) => {
+                            event.preventDefault();
+                            this.setState({
+                                email: { value: event.target.value, error: "", helperText: "" }
+                            })
+                            console.log(this.state.email);
+                        }}
                         error={this.state.email.error}
                         helperText={this.state.email.helperText}
                     />
@@ -90,13 +132,19 @@ class Login extends React.Component {
                         fullWidth
                         required
                         type="password"
-                        inputRef={input => (this.passwordInput = input)}
-                    />
-                    <p></p>
+                        onChange={(event) => {
+                            event.preventDefault();
+                            this.setState({
+                                password: { value: event.target.value, error: "", helperText: "" }
+                            })
+                            console.log(this.state.password);
+                        }} />
+                    <p>{this.state.error}</p>
                 </CardContent>
                 <CardActions style={{ justifyContent: "space-between" }}>
                     <Button onClick={() => {
                         this.setState({
+                            error: "",
                             isLoginForm: true
                         })
                     }}>Vous avez déjà un compte?</Button>
@@ -110,7 +158,6 @@ class Login extends React.Component {
             <div style={{ background: 'linear-gradient(to right bottom, #001f80, #7597ff)' }}>
                 <Grid
                     container
-                    spacing={0}
                     direction="column"
                     alignItems="center"
                     justify="center"
