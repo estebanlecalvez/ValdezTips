@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, Button, CardHeader, CardContent, CardActions, Grid, TextField } from "@material-ui/core";
-import { fade, makeStyles, withStyles } from "@material-ui/core/styles";
+import { withStyles } from "@material-ui/core/styles";
 import firebase from "firebase";
 import App from '../App';
 
@@ -42,16 +42,25 @@ class Login extends React.Component {
     register() {
         const { email, password } = this.state;
         const firebaseAuth = firebase.auth();
+        const db = firebase.firestore();
         if (email && password) {
             firebaseAuth.createUserWithEmailAndPassword(email.value, password.value).then((response) => {
                 console.log(response);
                 this.setState({
                     isLoginForm: true,
-                })
+                    uid: response.user.uid
+                });
+                db
+                    .collection("users")
+                    .doc(this.state.uid)
+                    .set({
+                        "email": email.value,
+                    });
             }).catch((error) => {
                 console.log(error);
                 this.setState({ error: error.message });
             });
+
         }
     }
 
@@ -110,7 +119,8 @@ class Login extends React.Component {
 
             ;
         const inscriptionForm =
-            <form onSubmit={this.register.bind(this)}>
+            <React.Fragment>
+
                 <CardHeader title="Inscription" className={classes.headerConnexionForm} />
                 <CardContent>
                     <TextField
@@ -149,11 +159,14 @@ class Login extends React.Component {
                             isLoginForm: true
                         })
                     }}>Vous avez déjà un compte?</Button>
-                    <Button type="submit" color="primary" raised>
+                    <Button onClick={() => {
+                        this.register();
+                    }}>
                         S'inscrire
                     </Button>
                 </CardActions>
-            </form>
+            </React.Fragment>
+
             ;
         return (
             <React.Fragment>
