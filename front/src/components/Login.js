@@ -19,8 +19,12 @@ class Login extends React.Component {
         this.state = {
             isLoginForm: true,
             error: null,
-            email: { value: null, error: false, helperText: null },
-            password: { value: null, error: false, helperText: null }
+            email: null,
+            password: null,
+            name: null,
+            lastname: null,
+            pseudo: null,
+            passwordValidation: null
         };
     }
 
@@ -30,7 +34,7 @@ class Login extends React.Component {
         const firebaseAuth = firebase.auth();
         const db = firebase.firestore();
         if (email && password) {
-            firebaseAuth.signInWithEmailAndPassword(email.value, password.value).then((response) => {
+            firebaseAuth.signInWithEmailAndPassword(email, password).then((response) => {
                 console.log(response);
                 this.setState({ isLoggedIn: true, token: response.user.getIdToken });
             }).catch((error) => {
@@ -40,26 +44,36 @@ class Login extends React.Component {
     }
 
     register() {
-        const { email, password } = this.state;
+        const { email, password, passwordValidation, lastname, name, pseudo } = this.state;
         const firebaseAuth = firebase.auth();
         const db = firebase.firestore();
         if (email && password) {
-            firebaseAuth.createUserWithEmailAndPassword(email.value, password.value).then((response) => {
-                console.log(response);
+            if (password != passwordValidation) {
                 this.setState({
-                    isLoginForm: true,
-                    uid: response.user.uid
-                });
-                db
-                    .collection("users")
-                    .doc(this.state.uid)
-                    .set({
-                        "email": email.value,
+                    error: "Les mots de passes ne correspondent pas."
+                })
+            } else {
+                firebaseAuth.createUserWithEmailAndPassword(email, password).then((response) => {
+                    console.log(response);
+                    this.setState({
+                        isLoginForm: true,
+                        uid: response.user.uid
                     });
-            }).catch((error) => {
-                console.log(error);
-                this.setState({ error: error.message });
-            });
+                    db
+                        .collection("users")
+                        .doc(this.state.uid)
+                        .set({
+                            "email": email,
+                            "name": name,
+                            "lastname": lastname,
+                            "pseudo": pseudo,
+                        });
+                }).catch((error) => {
+                    console.log(error);
+                    this.setState({ error: error.message });
+                });
+            }
+
 
         }
     }
@@ -79,12 +93,10 @@ class Login extends React.Component {
                         onChange={(event) => {
                             event.preventDefault();
                             this.setState({
-                                email: { value: event.target.value, error: "", helperText: "" }
+                                email: event.target.value
                             })
                             console.log(this.state.email);
                         }}
-                        error={this.state.email.error}
-                        helperText={this.state.email.helperText}
                     />
                     <TextField
                         label="Mot de passe"
@@ -94,10 +106,10 @@ class Login extends React.Component {
                         onChange={(event) => {
                             event.preventDefault();
                             this.setState({
-                                password: { value: event.target.value, error: "", helperText: "" }
+                                password: event.target.value
                             })
-                            console.log(this.state.password);
                         }} />
+
                     <p>{this.state.error}</p>
                 </CardContent>
                 <CardActions style={{ justifyContent: "space-between" }}>
@@ -120,23 +132,53 @@ class Login extends React.Component {
             ;
         const inscriptionForm =
             <React.Fragment>
-
                 <CardHeader title="Inscription" className={classes.headerConnexionForm} />
                 <CardContent>
                     <TextField
+                        label="Nom"
+                        autoFocus
+                        fullWidth
+                        required
+                        type="text"
+                        onChange={(event) => {
+                            event.preventDefault();
+                            this.setState({
+                                lastname: event.target.value
+                            })
+                        }} />
+                    <TextField
+                        label="Prénom"
+                        fullWidth
+                        required
+                        type="text"
+                        onChange={(event) => {
+                            event.preventDefault();
+                            this.setState({
+                                name: event.target.value
+                            })
+                        }} />
+                    <TextField
+                        label="Pseudonyme"
+                        fullWidth
+                        required
+                        type="text"
+                        onChange={(event) => {
+                            event.preventDefault();
+                            this.setState({
+                                pseudo: event.target.value
+                            })
+                        }} />
+                    <TextField
                         label="Email"
                         fullWidth
-                        autoFocus
                         required
                         onChange={(event) => {
                             event.preventDefault();
                             this.setState({
-                                email: { value: event.target.value, error: "", helperText: "" }
+                                email: event.target.value
                             })
                             console.log(this.state.email);
                         }}
-                        error={this.state.email.error}
-                        helperText={this.state.email.helperText}
                     />
                     <TextField
                         label="Mot de passe"
@@ -146,9 +188,19 @@ class Login extends React.Component {
                         onChange={(event) => {
                             event.preventDefault();
                             this.setState({
-                                password: { value: event.target.value, error: "", helperText: "" }
+                                password: event.target.value
                             })
-                            console.log(this.state.password);
+                        }} />
+                    <TextField
+                        label="Retapez le mot de passe"
+                        fullWidth
+                        required
+                        type="password"
+                        onChange={(event) => {
+                            event.preventDefault();
+                            this.setState({
+                                passwordValidation: event.target.value
+                            })
                         }} />
                     <p>{this.state.error}</p>
                 </CardContent>
