@@ -2,6 +2,8 @@ import React from "react";
 import { Card, Button, CardHeader, CardContent, CardActions, Grid, TextField } from "@material-ui/core";
 import { fade, makeStyles, withStyles } from "@material-ui/core/styles";
 import firebase from "firebase";
+import App from '../App';
+
 
 const styles = theme => ({
     card: {
@@ -22,27 +24,22 @@ class Login extends React.Component {
         };
     }
 
-    signIn(e) {
-        e.preventDefault();
+
+    signIn() {
         const { email, password } = this.state;
         const firebaseAuth = firebase.auth();
         const db = firebase.firestore();
-        const isLoggedIn = true;
-        if (!isLoggedIn && email && password) {
+        if (email && password) {
             firebaseAuth.signInWithEmailAndPassword(email.value, password.value).then((response) => {
                 console.log(response);
+                this.setState({ isLoggedIn: true, token: response.user.getIdToken });
             }).catch((error) => {
                 this.setState({ error: error.message });
             })
         }
-        if (isLoggedIn) {
-            this.props.history.push("/folders")
-        }
-
     }
 
-    register(e) {
-        e.preventDefault();
+    register() {
         const { email, password } = this.state;
         const firebaseAuth = firebase.auth();
         if (email && password) {
@@ -62,7 +59,7 @@ class Login extends React.Component {
         const { isLoginForm } = this.state;
         const { classes } = this.props;
         const loginForm =
-            <form onSubmit={this.signIn.bind(this)}>
+            <React.Fragment>
                 <CardHeader title="Connexion" className={classes.headerConnexionForm} />
                 <CardContent>
                     <TextField
@@ -102,11 +99,15 @@ class Login extends React.Component {
                             isLoginForm: false
                         })
                     }}>Vous n'avez pas de compte?</Button>
-                    <Button type="submit" color="primary" raised>
+                    <Button onClick={() => {
+                        this.signIn();
+                    }}>
                         Se connecter
                     </Button>
                 </CardActions>
-            </form>
+            </React.Fragment>
+
+
             ;
         const inscriptionForm =
             <form onSubmit={this.register.bind(this)}>
@@ -155,22 +156,28 @@ class Login extends React.Component {
             </form>
             ;
         return (
-            <div style={{ background: 'linear-gradient(to right bottom, #001f80, #7597ff)' }}>
-                <Grid
-                    container
-                    direction="column"
-                    alignItems="center"
-                    justify="center"
-                    style={{ minHeight: '100vh' }}
-                >
-                    <Grid item xs={12} sm={6}>
-                        <Card className={classes.card}>
-                            {isLoginForm ? loginForm : inscriptionForm}
-                        </Card>
+            <React.Fragment>
+                {this.state.isLoggedIn ? <App isLoggedIn={true} /> : <div style={{ background: 'linear-gradient(to right bottom, #001f80, #7597ff)' }}>
+                    <Grid
+                        container
+                        direction="column"
+                        alignItems="center"
+                        justify="center"
+                        style={{ minHeight: '100vh' }}
+                    >
+                        <Grid item xs={12} sm={6}>
+                            <Card className={classes.card}>
+                                {isLoginForm ? loginForm : inscriptionForm}
+                            </Card>
+                        </Grid>
                     </Grid>
-                </Grid>
-            </div >
-        );
+                </div >}
+
+
+
+
+            </React.Fragment>
+        )
     }
 }
 export default withStyles(styles)(Login);

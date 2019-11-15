@@ -13,6 +13,7 @@ import Tips from "./components/Tips";
 import Tip from "./components/Tip";
 import { withStyles } from "@material-ui/styles";
 import NotLoggedIn from "./components/NotLoggedIn";
+import firebase from "firebase";
 
 const styles = makeStyles(theme => ({
   root: {
@@ -79,6 +80,15 @@ class SearchAppBar extends React.Component {
   constructor(props) {
     super(props);
     this.state = { isAUserConnected: false, searchTerms: null }
+  }
+
+  componentDidMount() {
+    const currentUser = firebase.auth().currentUser;
+    console.log(currentUser);
+    if (currentUser) {
+      this.setState({ isAUserConnected: true });
+
+    }
   }
   render() {
 
