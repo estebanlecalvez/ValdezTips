@@ -26,6 +26,8 @@ class Login extends React.Component {
             pseudo: null,
             passwordValidation: null
         };
+        this.googleProvider = new firebase.auth.GoogleAuthProvider;
+
     }
 
 
@@ -77,6 +79,14 @@ class Login extends React.Component {
 
         }
     }
+    doSignInWithGoogle() {
+        firebase.auth().signInWithPopup(this.googleProvider).then(() => {
+            this.setState({
+                isLoggedIn: true
+            })
+        });
+    }
+
 
     render() {
         const { isLoginForm } = this.state;
@@ -109,6 +119,9 @@ class Login extends React.Component {
                                 password: event.target.value
                             })
                         }} />
+                    <Button onClick={() => {
+                        this.doSignInWithGoogle();
+                    }}>Sign in with google</Button>
 
                     <p>{this.state.error}</p>
                 </CardContent>
