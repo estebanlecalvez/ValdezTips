@@ -11,8 +11,10 @@ import FoldersPage from "./components/FoldersPage";
 import { Button } from "@material-ui/core";
 import Tips from "./components/Tips";
 import Tip from "./components/Tip";
+import { withStyles } from "@material-ui/styles";
+import NotLoggedIn from "./components/NotLoggedIn";
 
-const useStyles = makeStyles(theme => ({
+const styles = makeStyles(theme => ({
   root: {
     flexGrow: 1
   },
@@ -72,53 +74,67 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function SearchAppBar() {
-  const classes = useStyles();
+class SearchAppBar extends React.Component {
 
-  return (
-    <div className={classes.root}>
-      <Router>
-        <AppBar position="static" className={classes.appbar}>
-          <Toolbar>
-            <IconButton
-              edge="start"
-              className={classes.menuButton}
-              color="inherit"
-              aria-label="open drawer"
-            >
-              <AcUnitIcon />
-            </IconButton>
-            <Button className={classes.title} href="/">
-              Parcourir les jeux
+  constructor(props) {
+    super(props);
+    this.state = { isAUserConnected: false, searchTerms: null }
+  }
+  render() {
+
+    const { classes } = this.props;
+    const { isAUserConnected, searchTerms } = this.state;
+
+    return (
+      <div className={classes.root}>
+        {isAUserConnected ?
+          <Router>
+            <AppBar position="static" className={classes.appbar}>
+              <Toolbar>
+                <IconButton
+                  edge="start"
+                  className={classes.menuButton}
+                  color="inherit"
+                  aria-label="open drawer"
+                >
+                  <AcUnitIcon />
+                </IconButton>
+                <Button className={classes.title} href="/">
+                  Parcourir les jeux
             </Button>
 
-            <div className={classes.search}>
-              <div className={classes.searchIcon}>
-                <SearchIcon />
-              </div>
+                <div className={classes.search}>
+                  <div className={classes.searchIcon}>
+                    <SearchIcon />
+                  </div>
 
-              <InputBase
-                placeholder="Search…"
-                classes={{
-                  root: classes.inputRoot,
-                  input: classes.inputInput
-                }}
-                inputProps={{ "aria-label": "search" }}
-              />
-            </div>
-          </Toolbar>
-        </AppBar>
-        <Switch>
-          <Route path="/tip/:id" component={Tip} />
-          <Route path="/folders/:id" component={Tips} />
-          <Route path="/folders">
-            <FoldersPage />
-          </Route>
-          <Route path="/">
-            <FoldersPage />
-          </Route>
-        </Switch>
-      </Router>
-    </div>
-  );
+                  <InputBase
+                    placeholder="Search…"
+                    classes={{
+                      root: classes.inputRoot,
+                      input: classes.inputInput
+                    }}
+                    inputProps={{ "aria-label": "search" }}
+                  />
+                </div>
+              </Toolbar>
+            </AppBar>
+            <Switch>
+              <Route path="/tip/:id" component={Tip} />
+              <Route path="/folders/:id" component={Tips} />
+              <Route path="/folders">
+                <FoldersPage />
+              </Route>
+              <Route path="/">
+                <FoldersPage />
+              </Route>
+            </Switch>
+          </Router>
+          :
+          <NotLoggedIn isLoginForm={true} />}
+
+      </div>
+    );
+  }
 }
+export default withStyles(styles)(SearchAppBar);
