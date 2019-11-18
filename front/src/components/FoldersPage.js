@@ -89,7 +89,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 class FoldersPage extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { image: "", name: "", open: false, folders: [], charging: true, file: null, cropFile: false, selectImage: true };
+    this.state = { image: "", name: "", open: false, folders: [], charging: true, file: null, cropFile: false, selectImage: true, error: "" };
     this.publishToFirestore = this.publishToFirestore.bind(this);
     this.handleClose = this.handleClose.bind(this);
     this.fetchFolders = this.fetchFolders.bind(this);
@@ -116,21 +116,27 @@ class FoldersPage extends React.Component {
   };
 
   publishToFirestore() {
-    const db = firebase.firestore();
-    db
-      .collection("folders")
-      .add({
-        name: this.state.name,
-        image: this.state.image
-      })
-      .then(function () {
-        console.log("Folders Successfully added");
-      })
-      .catch(function (error) {
-        console.error("Error writing document: ", error);
-      });
-    this.handleClose();
-    this.fetchFolders();
+    if (this.state.image && this.state.name) {
+      const db = firebase.firestore();
+      db
+        .collection("folders")
+        .add({
+          name: this.state.name,
+          image: this.state.image
+        })
+        .then(function () {
+          console.log("Folders Successfully added");
+        })
+        .catch(function (error) {
+          console.error("Error writing document: ", error);
+        });
+      this.setState({ error: "" });
+      this.handleClose();
+      this.fetchFolders();
+    } else {
+      this.setState({ error: "Vous devez entrer un nom et une image." });
+    }
+
   }
 
   fetchFolders() {
@@ -166,7 +172,7 @@ class FoldersPage extends React.Component {
 
   render() {
     const { classes } = this.props;
-    var { folders, charging, file, image, name, selectImage } = this.state;
+    var { folders, charging, file, image, name, selectImage, error } = this.state;
     var renderFolders = folders.map(folder => (
       <Grid key={folder.id} xs={"auto"} item>
         <Card
@@ -284,8 +290,9 @@ class FoldersPage extends React.Component {
               </Card>
             </Container>
           ) : null}
-
           <DialogActions>
+            <p>{error}</p>
+
             <Button onClick={this.publishToFirestore} color="primary">
               Créer
             </Button>
