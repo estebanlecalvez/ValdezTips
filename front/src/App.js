@@ -8,13 +8,14 @@ import SearchIcon from "@material-ui/icons/Search";
 import AcUnitIcon from "@material-ui/icons/AcUnit";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import FoldersPage from "./components/FoldersPage";
-import { Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem, Button, Avatar } from "@material-ui/core";
+import { Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem, Button, Avatar, Link, Dialog, DialogTitle, DialogContent, TextField } from "@material-ui/core";
 import Tips from "./components/Tips";
 import Tip from "./components/Tip";
 import { withStyles } from "@material-ui/core/styles";
 import firebase from 'firebase';
 import Login from "./components/Login";
 import MyAccount from "./components/MyAccount";
+import CreateIcon from '@material-ui/icons/Create';
 
 const styles = theme => ({
   root: {
@@ -79,14 +80,24 @@ const styles = theme => ({
   },
   appbar: {
     height: 60
-  }
+  },
+  account_picture: {
+    height: "10vh",
+    width: "10vh"
+  },
+  alignRight: {
+    position: "absolute",
+    right: 15,
+    top: 15,
+    align: "right",
+  },
 });
 
 class SearchAppBar extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { isAUserConnected: false, searchTerms: null, charging: false, isMenuOpen: false };
+    this.state = { isAUserConnected: false, searchTerms: null, charging: false, isMenuOpen: false, openMyAccount: false, user: null, modifiedMyAccount: false };
     this.inputRef = null;
   }
 
@@ -141,7 +152,49 @@ class SearchAppBar extends React.Component {
 
   render() {
     const { classes } = this.props;
-    const { isAUserConnected, user, isMenuOpen } = this.state;
+    const { isAUserConnected, user, isMenuOpen, modifiedMyAccount } = this.state;
+
+    const myAccount = <Dialog
+      open={this.state.openMyAccount}
+      onClose={() => { this.setState({ openMyAccount: false }) }}
+      aria-labelledby="alert-dialog-slide-title"
+      aria-describedby="alert-dialog-slide-description"
+    >
+      <DialogTitle id="alert-dialog-slide-title">
+        Mon compte
+        <CreateIcon className={classes.alignRight} onClick={
+          () => {
+            this.setState({
+              modifiedMyAccount: !this.state.modifiedMyAccount
+            })
+          }
+        } />
+      </DialogTitle>
+      <DialogContent>
+        {user ?
+          modifiedMyAccount ?
+            <React.Fragment>
+              <Avatar className={classes.account_picture} src={user.image} />
+              <TextField className={classes.TextField} label="Nom" />
+              <p></p>
+              <TextField className={classes.TextField} label="Prénom" />
+              <p></p>
+              <TextField className={classes.TextField} label="Email" />
+              <p></p>
+              <TextField className={classes.TextField} label="Pseudo" />
+            </React.Fragment>
+            :
+            <React.Fragment>
+              <Avatar className={classes.account_picture} src={user.image} />
+              <p>Mon nom: {user.lastname}</p>
+              <p>Mon prénom: {user.name}</p>
+              <p>Mon email: {user.email}</p>
+              <p>Mon pseudo: {user.pseudo}</p>
+            </React.Fragment>
+          : null}
+      </DialogContent>
+    </Dialog>;
+
     return (
       <div className={classes.root}>
         {isAUserConnected ?
@@ -159,7 +212,6 @@ class SearchAppBar extends React.Component {
                 <Button className={classes.title} href="/">
                   Parcourir les jeux
             </Button>
-
                 <div className={classes.search}>
                   <div className={classes.searchIcon}>
                     <SearchIcon />
@@ -200,8 +252,12 @@ class SearchAppBar extends React.Component {
                             });
                           }}>
                             <MenuList autoFocusItem={isMenuOpen} id="menu-list-grow" onKeyDown={(event) => { this.handleListKeyDown(event); }}>
-                              <MenuItem onClick={this.my_account} >
-                                <a>Mon compte</a>
+                              <MenuItem onClick={() => {
+                                this.setState({
+                                  openMyAccount: true
+                                })
+                              }}>
+                                Mon compte
                               </MenuItem>
                               <MenuItem onClick={() => {
                                 localStorage["currentUserId"] = null;
@@ -218,22 +274,28 @@ class SearchAppBar extends React.Component {
                     )}
                   </Popper>
                 </div>
+                {myAccount}
               </Toolbar>
             </AppBar>
             <Switch>
               <Route path="/tip/:id" component={Tip} />
-              <Route path="/my_account" component={MyAccount} />
+
               <Route path="/folders/:id" component={Tips} />
               <Route path="/folders">
                 <FoldersPage />
+              </Route>
+              <Route path="/my_account" >
+                <MyAccount />
               </Route>
               <Route path="/">
                 <FoldersPage />
               </Route>
             </Switch>
+
           </Router>
           :
-          <Login />}
+          <Login />
+        }
       </div>
     );
   }
