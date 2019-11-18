@@ -100,26 +100,37 @@ class Tips extends React.Component {
   }
 
   publishToFirestore() {
-    const db = firebase.firestore();
-    db
-      .collection("tips")
-      .add({
-        gameId: this.props.match.params.id,
-        name: this.state.name,
-        description: this.state.description,
-        text: this.state.text,
-        createdOn: new Date(),
-        lastModifiedOn: null
-      })
-      .then(function () {
-        this.handleClose();
-        this.fetchTips();
-      })
-      .catch(function (error) {
-        console.error("Error writing document: ", error);
+
+    if (this.state.name && this.state.text) {
+      const db = firebase.firestore();
+      db
+        .collection("tips")
+        .add({
+          gameId: this.props.match.params.id,
+          name: this.state.name,
+          description: this.state.description,
+          text: this.state.text,
+          createdOn: new Date(),
+          lastModifiedOn: null
+        })
+        .then(function () {
+          this.handleClose();
+          this.fetchTips();
+        })
+        .catch(function (error) {
+          console.error("Error writing document: ", error);
+        });
+      this.setState({
+        error: ""
       });
-    this.handleClose();
-    this.fetchTips();
+      this.handleClose();
+      this.fetchTips();
+    } else {
+      this.setState({
+        error: "Vous devez donner au moins un nom et une description."
+      });
+    }
+
   }
 
   fetchTips() {
@@ -291,7 +302,7 @@ class Tips extends React.Component {
                     this.setState({ text: value });
                   }}>
                 </ReactQuill>
-                <p></p>
+                <p>{this.state.error}</p>
               </form>
             </DialogContent>
 

@@ -158,6 +158,7 @@ class Tip extends React.Component {
       text: this.state.newtext,
       description: this.state.newdesc,
       name: this.state.newname,
+      createdOn: this.state.tip.createdOn,
       lastModifiedOn: new Date()
     }).then(() => {
       this.handleClickCloseModification();
