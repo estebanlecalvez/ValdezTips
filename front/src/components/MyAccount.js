@@ -1,7 +1,6 @@
 import React from "react";
 import { Card, Button, CardHeader, CardContent, CardActions, Grid, TextField, Avatar } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
-import firebase from "firebase";
 import ImageSelectPreview from 'react-image-select-pv';
 
 const styles = theme => ({
@@ -32,7 +31,6 @@ class MyAccount extends React.Component {
             pseudo: null,
             passwordValidation: null,
             file: null, cropFile: false, selectImage: true,
-            image: "",
         };
     }
 
@@ -50,7 +48,6 @@ class MyAccount extends React.Component {
                             <p>Sélectionnez une image</p>
                             <ImageSelectPreview
                                 onChange={data => {
-                                    console.log(data);
                                     this.setState({
                                         image: data[0].content,
                                         selectImage: false
@@ -103,7 +100,6 @@ class MyAccount extends React.Component {
                             this.setState({
                                 email: event.target.value
                             })
-                            console.log(this.state.email);
                         }}
                     />
                     <TextField

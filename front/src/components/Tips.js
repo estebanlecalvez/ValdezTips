@@ -9,10 +9,6 @@ import {
   Fab,
   Button,
   TextField,
-  CircularProgress,
-  CardActions,
-  IconButton,
-
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import FullscreenIcon from '@material-ui/icons/Fullscreen';
@@ -207,7 +203,6 @@ class Tips extends React.Component {
         ['clean']
       ],
     };
-    var date = new Date().getDay()
 
     const formats = [
       'header',
@@ -237,9 +232,6 @@ class Tips extends React.Component {
               </Typography>
             </CardContent>
           </CardActionArea>
-          {/* TODO: Handle la date */}
-          {/* <Typography>Créée le: {
-              tip.data.createdOn}</Typography> */}
         </Card>
       </Grid>
     ));

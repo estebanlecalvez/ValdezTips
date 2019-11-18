@@ -8,7 +8,7 @@ import SearchIcon from "@material-ui/icons/Search";
 import AcUnitIcon from "@material-ui/icons/AcUnit";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import FoldersPage from "./components/FoldersPage";
-import { Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem, Button, Avatar, Link, Dialog, DialogTitle, DialogContent, TextField } from "@material-ui/core";
+import { Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem, Avatar, Dialog, DialogTitle, DialogContent, TextField, Typography } from "@material-ui/core";
 import Tips from "./components/Tips";
 import Tip from "./components/Tip";
 import { withStyles } from "@material-ui/core/styles";
@@ -20,9 +20,6 @@ import CreateIcon from '@material-ui/icons/Create';
 const styles = theme => ({
   root: {
     flexGrow: 1
-  },
-  appbar: {
-    backgroundColor: "green"
   },
   menuButton: {
     marginRight: theme.spacing(2)
@@ -103,7 +100,7 @@ class SearchAppBar extends React.Component {
 
   componentDidMount() {
     // Les valeurs dans le localStorage sont toujours des strings, pour ça qu'on vérifie "null" et non pas null
-    if (localStorage["currentUserId"] != "null") {
+    if (localStorage["currentUserId"] !== "null") {
       this.setState({
         isAUserConnected: true
       });
@@ -127,17 +124,14 @@ class SearchAppBar extends React.Component {
     docRef.get().then(doc => {
       if (doc.exists) {
         currentUser = doc.data();
-        console.log(currentUser);
         this.setState({
           user: currentUser,
           charging: false
         })
       } else {
-        console.log("No such document!");
       }
 
     }).catch(function (error) {
-      console.log("Error getting document:", error);
     });
 
   }
@@ -206,12 +200,13 @@ class SearchAppBar extends React.Component {
                   className={classes.menuButton}
                   color="inherit"
                   aria-label="open drawer"
+                  href="/"
                 >
                   <AcUnitIcon />
                 </IconButton>
-                <Button className={classes.title} href="/">
-                  Parcourir les jeux
-            </Button>
+                <Typography className={classes.title} href="/">
+                  Valdez Tips
+                </Typography>
                 <div className={classes.search}>
                   <div className={classes.searchIcon}>
                     <SearchIcon />
@@ -240,7 +235,7 @@ class SearchAppBar extends React.Component {
                   <Avatar alt=""></Avatar>}
                 <div>
                   <Popper open={isMenuOpen} anchorEl={this.inputRef} role={undefined} transition >
-                    {({ TransitionProps, placement }) => (
+                    {({ TransitionProps }) => (
                       <Grow
                         {...TransitionProps}
                         style={{ transformOrigin: 'auto' }}
@@ -265,7 +260,7 @@ class SearchAppBar extends React.Component {
                                   isAUserConnected: false,
                                 });
                               }} >
-                                <a>Déconnexion</a>
+                                Déconnexion
                               </MenuItem>
                             </MenuList>
                           </ClickAwayListener>

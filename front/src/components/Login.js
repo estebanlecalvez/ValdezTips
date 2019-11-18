@@ -35,7 +35,6 @@ class Login extends React.Component {
             pseudo: null,
             passwordValidation: null,
             file: null, cropFile: false, selectImage: true,
-            image: "",
         };
         this.googleProvider = new firebase.auth.GoogleAuthProvider;
 
@@ -45,10 +44,8 @@ class Login extends React.Component {
     signIn() {
         const { email, password } = this.state;
         const firebaseAuth = firebase.auth();
-        const db = firebase.firestore();
         if (email && password) {
             firebaseAuth.signInWithEmailAndPassword(email, password).then((response) => {
-                console.log(response);
                 localStorage["currentUserId"] = response.user.uid;
                 this.setState({ isLoggedIn: true, token: response.user.getIdToken });
             }).catch((error) => {
@@ -75,16 +72,14 @@ class Login extends React.Component {
         const { email, password, passwordValidation, lastname, name, pseudo, image } = this.state;
         const firebaseAuth = firebase.auth();
         if (email && password) {
-            if (password != passwordValidation) {
+            if (password !== passwordValidation) {
                 this.setState({
                     error: "Les mots de passes ne correspondent pas."
                 })
             } else {
                 firebaseAuth.createUserWithEmailAndPassword(email, password).then((response) => {
-                    console.log(response);
                     this.addToFirestore(this.state.uid, email, name, lastname, pseudo, image);
                 }).catch((error) => {
-                    console.log(error);
                     this.setState({ error: error.message });
                 });
             }
@@ -93,13 +88,11 @@ class Login extends React.Component {
 
     doSignInWithGoogle() {
         firebase.auth().signInWithPopup(this.googleProvider).then((response) => {
-            console.log("response from signInWithGoogle :", response);
             localStorage["currentUserId"] = response.user.uid;
             const data = response.user.providerData[0];
             this.addToFirestore(response.user.uid, data.email, data.displayName, data.displayName, data.displayName, data.photoURL);
             this.setState({ isLoggedIn: true, token: response.user.getIdToken });
         }).catch((error) => {
-            console.log("There was an error:", error);
         });
     }
 
@@ -121,7 +114,6 @@ class Login extends React.Component {
                             this.setState({
                                 email: event.target.value
                             })
-                            console.log(this.state.email);
                         }}
                     />
                     <TextField
@@ -168,7 +160,6 @@ class Login extends React.Component {
                             <p>Sélectionnez une image</p>
                             <ImageSelectPreview
                                 onChange={data => {
-                                    console.log(data);
                                     this.setState({
                                         image: data[0].content,
                                         selectImage: false
@@ -221,7 +212,6 @@ class Login extends React.Component {
                             this.setState({
                                 email: event.target.value
                             })
-                            console.log(this.state.email);
                         }}
                     />
                     <TextField

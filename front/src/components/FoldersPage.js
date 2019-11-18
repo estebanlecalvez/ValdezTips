@@ -13,7 +13,6 @@ import {
   Button,
   TextField,
   Container,
-  CircularProgress
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import Dialog from "@material-ui/core/Dialog";
@@ -25,8 +24,6 @@ import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/styles";
 import firebase from "firebase";
 import CenteredCircularProgress from "../utilsComponents/CenteredCircularProgress";
-import Cropper from 'react-cropper';
-import 'cropperjs/dist/cropper.css';
 
 import ImageSelectPreview from 'react-image-select-pv';
 
@@ -82,14 +79,13 @@ const styles = theme => ({
     color: "none"
   },
 });
-const cropper = React.createRef(null);
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 class FoldersPage extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { image: "", name: "", open: false, folders: [], charging: true, file: null, cropFile: false, selectImage: true, error: "" };
+    this.state = { image: "", name: "", open: false, folders: [], charging: true, selectImage: true, error: "" };
     this.publishToFirestore = this.publishToFirestore.bind(this);
     this.handleClose = this.handleClose.bind(this);
     this.fetchFolders = this.fetchFolders.bind(this);
@@ -125,7 +121,6 @@ class FoldersPage extends React.Component {
           image: this.state.image
         })
         .then(function () {
-          console.log("Folders Successfully added");
         })
         .catch(function (error) {
           console.error("Error writing document: ", error);
@@ -164,15 +159,10 @@ class FoldersPage extends React.Component {
   }
 
 
-  _crop() {
-    // image in dataUrl
-    console.log(this.state.file);
-    console.log(this.refs.cropper.getCroppedCanvas().toDataURL());
-  }
 
   render() {
     const { classes } = this.props;
-    var { folders, charging, file, image, name, selectImage, error } = this.state;
+    var { folders, charging, image, name, selectImage, error } = this.state;
     var renderFolders = folders.map(folder => (
       <Grid key={folder.id} xs={"auto"} item>
         <Card
@@ -249,7 +239,6 @@ class FoldersPage extends React.Component {
               /> */}
               {selectImage ? <ImageSelectPreview
                 onChange={data => {
-                  console.log(data);
                   this.setState({
                     image: data[0].content,
                     selectImage: false
@@ -264,9 +253,7 @@ class FoldersPage extends React.Component {
               <Card className={classes.card}>
                 <CardMedia
                   src=""
-                  children=""
                   className={classes.media}
-                  image={image}
                   title={name + " image."}
                   children={image ? <Fab aria-label="modify_picture" className={classes.fabOnImage} size="small">
                     <CreateIcon onClick={() => {

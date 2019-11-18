@@ -1,7 +1,6 @@
 import React from "react";
 import { withStyles } from "@material-ui/styles";
 import firebase from "firebase";
-
 import { Container, Dialog, DialogContent, DialogTitle, Button, DialogActions, TextField, Card, CardContent, IconButton, CardHeader, Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem } from "@material-ui/core";
 import FullscreenIcon from '@material-ui/icons/Fullscreen';
 import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
@@ -10,7 +9,7 @@ import CenteredCircularProgress from "../utilsComponents/CenteredCircularProgres
 import KeyboardReturnIcon from '@material-ui/icons/KeyboardReturn';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 
-const styles = theme => ({
+const styles = ({
   pageContent: {
     marginTop: 10,
     marginLeft: "5vw",
@@ -109,7 +108,6 @@ class Tip extends React.Component {
     docRef.get().then(doc => {
       if (doc.exists) {
         currentTip = doc.data();
-        console.log(currentTip);
         this.setState({
           tip: currentTip,
           newtext: currentTip.text,
@@ -119,11 +117,11 @@ class Tip extends React.Component {
         })
       } else {
         // doc.data() will be undefined in this case
-        console.log("No such document!");
+        console.error("No such document!");
       }
 
     }).catch(function (error) {
-      console.log("Error getting document:", error);
+      console.error("Error getting document:", error);
     });
 
   }
@@ -255,10 +253,10 @@ class Tip extends React.Component {
                           }}>
                             <MenuList autoFocusItem={isMenuOpen} id="menu-list-grow" onKeyDown={(event) => { this.handleListKeyDown(event); }}>
                               <MenuItem onClick={this.handleClickOpenModification} style={{ color: "darkGreen" }} >
-                                <a>Modifier</a>
+                                Modifier
                               </MenuItem>
                               <MenuItem onClick={this.handleClickOpenDeletion} style={{ color: "darkRed" }} >
-                                <a>Supprimer</a>
+                                Supprimer
                               </MenuItem>
                             </MenuList>
                           </ClickAwayListener>
@@ -339,7 +337,6 @@ class Tip extends React.Component {
                   formats={formats}
                   value={newtext}
                   onChange={(value) => {
-                    console.log(value)
                     this.setState({ newtext: value });
                   }}>
                 </ReactQuill>

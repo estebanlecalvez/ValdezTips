@@ -2,19 +2,16 @@ import { CircularProgress, Grid } from "@material-ui/core";
 import { withStyles } from "@material-ui/styles";
 import React from "react";
 
-const styles = theme => ({
+const styles = ({
     centeredCircularProgress: {
         color: 'darkBlue'
     }
 });
 
 class CenteredCircularProgress extends React.Component {
-    constructor(props) {
-        super(props)
-    }
 
     render() {
-        const { color, size, className, classes } = this.props;
+        const { size, className, classes } = this.props;
 
         return (
             <React.Fragment>
