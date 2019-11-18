@@ -6,12 +6,10 @@ class NotLoggedIn extends React.Component {
     }
 
     render() {
-        const { isLoginForm } = this.props;
         return (
             <React.Fragment>
                 <Login />
             </React.Fragment>
-
         );
     }
 

@@ -8,14 +8,16 @@ import SearchIcon from "@material-ui/icons/Search";
 import AcUnitIcon from "@material-ui/icons/AcUnit";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import FoldersPage from "./components/FoldersPage";
-import { Button } from "@material-ui/core";
+import { Button, Avatar, CircularProgress } from "@material-ui/core";
 import Tips from "./components/Tips";
 import Tip from "./components/Tip";
-import { withStyles } from "@material-ui/styles";
+import { withStyles } from "@material-ui/core/styles";
 import NotLoggedIn from "./components/NotLoggedIn";
-import firebase from "firebase";
+import DeleteIcon from '@material-ui/icons/Delete';
+import firebase from 'firebase';
+import Login from "./components/Login";
 
-const styles = makeStyles(theme => ({
+const styles = theme => ({
   root: {
     flexGrow: 1
   },
@@ -33,6 +35,11 @@ const styles = makeStyles(theme => ({
       display: "block"
     }
   },
+  user: {
+    position: "fixed",
+    left: 0,
+    top: 0
+  },
   search: {
     position: "relative",
     borderRadius: theme.shape.borderRadius,
@@ -41,6 +48,7 @@ const styles = makeStyles(theme => ({
       backgroundColor: fade(theme.palette.common.white, 0.25)
     },
     marginLeft: 0,
+    marginRight: 50,
     width: "100%",
     [theme.breakpoints.up("sm")]: {
       marginLeft: theme.spacing(1),
@@ -73,28 +81,59 @@ const styles = makeStyles(theme => ({
   appbar: {
     height: 60
   }
-}));
+});
 
 class SearchAppBar extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { isAUserConnected: false, searchTerms: null }
+    this.state = { isAUserConnected: false, searchTerms: null, charging: false }
   }
 
   componentDidMount() {
-    const currentUser = firebase.auth().currentUser;
-    console.log(currentUser);
-    if (currentUser) {
-      this.setState({ isAUserConnected: true });
-
+    // Les valeurs dans le localStorage sont toujours des strings, pour ça qu'on vérifie "null" et non pas null
+    if (localStorage["currentUserId"] != "null") {
+      this.setState({
+        isAUserConnected: true
+      });
+      this.getUser();
+    } else {
+      this.setState({
+        isAUserConnected: false
+      });
     }
   }
+
+  getCurrentUserId() {
+    return localStorage["currentUserId"];
+  }
+
+  getUser() {
+    const db = firebase.firestore();
+    var currentUser = {}
+    this.setState({ charging: true });
+    var docRef = db.collection("users").doc(this.getCurrentUserId());
+    docRef.get().then(doc => {
+      if (doc.exists) {
+        currentUser = doc.data();
+        console.log(currentUser);
+        this.setState({
+          user: currentUser,
+          charging: false
+        })
+      } else {
+        // doc.data() will be undefined in this case
+        console.log("No such document!");
+      }
+
+    }).catch(function (error) {
+      console.log("Error getting document:", error);
+    });
+
+  }
   render() {
-
     const { classes } = this.props;
-    const { isAUserConnected, searchTerms } = this.state;
-
+    const { isAUserConnected, user } = this.state;
     return (
       <div className={classes.root}>
         {isAUserConnected ?
@@ -127,6 +166,14 @@ class SearchAppBar extends React.Component {
                     inputProps={{ "aria-label": "search" }}
                   />
                 </div>
+                {user ? <Avatar src={user.image} alt="Current user."></Avatar> : <Avatar alt=""></Avatar>}
+                <DeleteIcon onClick={() => {
+                  localStorage["currentUserId"] = null
+                  this.setState({
+                    isAUserConnected: false,
+                  });
+                }} />
+
               </Toolbar>
             </AppBar>
             <Switch>
@@ -141,8 +188,7 @@ class SearchAppBar extends React.Component {
             </Switch>
           </Router>
           :
-          <NotLoggedIn isLoginForm={true} />}
-
+          <Login />}
       </div>
     );
   }
