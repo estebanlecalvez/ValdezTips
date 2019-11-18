@@ -1,16 +1,14 @@
 import React from "react";
 import { withStyles } from "@material-ui/styles";
 import firebase from "firebase";
-import DeleteIcon from '@material-ui/icons/Delete';
-import CreateIcon from '@material-ui/icons/Create';
-import { Typography, Container, CircularProgress, Fab, Dialog, DialogContent, DialogTitle, Button, DialogActions, TextField, Card, CardContent, CardActions, IconButton, CardHeader, Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem } from "@material-ui/core";
+
+import { Container, Dialog, DialogContent, DialogTitle, Button, DialogActions, TextField, Card, CardContent, IconButton, CardHeader, Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem } from "@material-ui/core";
 import FullscreenIcon from '@material-ui/icons/Fullscreen';
 import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
 import ReactQuill from "react-quill";
 import CenteredCircularProgress from "../utilsComponents/CenteredCircularProgress";
 import KeyboardReturnIcon from '@material-ui/icons/KeyboardReturn';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-import moment from "moment";
 
 const styles = theme => ({
   pageContent: {

@@ -3,19 +3,18 @@ import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
-import { fade, makeStyles } from "@material-ui/core/styles";
+import { fade } from "@material-ui/core/styles";
 import SearchIcon from "@material-ui/icons/Search";
 import AcUnitIcon from "@material-ui/icons/AcUnit";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import FoldersPage from "./components/FoldersPage";
-import { Button, Avatar, CircularProgress } from "@material-ui/core";
+import { Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem, Button, Avatar } from "@material-ui/core";
 import Tips from "./components/Tips";
 import Tip from "./components/Tip";
 import { withStyles } from "@material-ui/core/styles";
-import NotLoggedIn from "./components/NotLoggedIn";
-import DeleteIcon from '@material-ui/icons/Delete';
 import firebase from 'firebase';
 import Login from "./components/Login";
+import MyAccount from "./components/MyAccount";
 
 const styles = theme => ({
   root: {
@@ -87,7 +86,8 @@ class SearchAppBar extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { isAUserConnected: false, searchTerms: null, charging: false }
+    this.state = { isAUserConnected: false, searchTerms: null, charging: false, isMenuOpen: false };
+    this.inputRef = null;
   }
 
   componentDidMount() {
@@ -122,7 +122,6 @@ class SearchAppBar extends React.Component {
           charging: false
         })
       } else {
-        // doc.data() will be undefined in this case
         console.log("No such document!");
       }
 
@@ -131,9 +130,18 @@ class SearchAppBar extends React.Component {
     });
 
   }
+
+  handleListKeyDown(event) {
+    if (event.key === 'Tab') {
+      event.preventDefault();
+      this.setState({ isMenuOpen: false });
+    }
+  }
+
+
   render() {
     const { classes } = this.props;
-    const { isAUserConnected, user } = this.state;
+    const { isAUserConnected, user, isMenuOpen } = this.state;
     return (
       <div className={classes.root}>
         {isAUserConnected ?
@@ -166,18 +174,55 @@ class SearchAppBar extends React.Component {
                     inputProps={{ "aria-label": "search" }}
                   />
                 </div>
-                {user ? <Avatar src={user.image} alt="Current user."></Avatar> : <Avatar alt=""></Avatar>}
-                <DeleteIcon onClick={() => {
-                  localStorage["currentUserId"] = null
-                  this.setState({
-                    isAUserConnected: false,
-                  });
-                }} />
-
+                {user ?
+                  <IconButton aria-label="settings"
+                    onClick={() => { this.setState({ isMenuOpen: !isMenuOpen }) }}>
+                    <Avatar
+                      aria-controls={isMenuOpen ? 'menu-list-grow' : undefined}
+                      aria-haspopup="true"
+                      src={user.image}
+                      ref={inputRef => { this.inputRef = inputRef }}
+                      alt="Current user." />
+                  </IconButton>
+                  :
+                  <Avatar alt=""></Avatar>}
+                <div>
+                  <Popper open={isMenuOpen} anchorEl={this.inputRef} role={undefined} transition >
+                    {({ TransitionProps, placement }) => (
+                      <Grow
+                        {...TransitionProps}
+                        style={{ transformOrigin: 'auto' }}
+                      >
+                        <Paper>
+                          <ClickAwayListener onClickAway={() => {
+                            this.setState({
+                              isMenuOpen: false
+                            });
+                          }}>
+                            <MenuList autoFocusItem={isMenuOpen} id="menu-list-grow" onKeyDown={(event) => { this.handleListKeyDown(event); }}>
+                              <MenuItem onClick={this.my_account} >
+                                <a>Mon compte</a>
+                              </MenuItem>
+                              <MenuItem onClick={() => {
+                                localStorage["currentUserId"] = null;
+                                this.setState({
+                                  isAUserConnected: false,
+                                });
+                              }} >
+                                <a>Déconnexion</a>
+                              </MenuItem>
+                            </MenuList>
+                          </ClickAwayListener>
+                        </Paper>
+                      </Grow>
+                    )}
+                  </Popper>
+                </div>
               </Toolbar>
             </AppBar>
             <Switch>
               <Route path="/tip/:id" component={Tip} />
+              <Route path="/my_account" component={MyAccount} />
               <Route path="/folders/:id" component={Tips} />
               <Route path="/folders">
                 <FoldersPage />
