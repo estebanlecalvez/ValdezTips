@@ -211,42 +211,61 @@ class Tips extends React.Component {
       'link', 'image'
     ];
     const { tips, isDialogFullScreen } = this.state;
-    var renderTips = tips.map(tip => (
-      <Grid key={tip.id} xs={"auto"} item>
-        <Card
-          className={classes.card}
-          onClick={() => this.goIntoTip(tip.id)}
-        >
-          <CardActionArea>
-            <CardContent>
-              <Typography
-                gutterBottom
-                variant="h5"
-                component="h2"
-                className={classes.cardTitle}
-              >
-                {tip.data.name}
-              </Typography>
-              <Typography>
-                {tip.data.description || "Pas de description"}
-              </Typography>
-            </CardContent>
-          </CardActionArea>
-        </Card>
-      </Grid>
-    ));
+    var renderTips =
+      tips.map(tip => (
+        <Grid key={tip.id} xs={"auto"} item>
+          <Card
+            className={classes.card}
+            onClick={() => this.goIntoTip(tip.id)}
+          >
+            <CardActionArea>
+              <CardContent>
+                <Typography
+                  gutterBottom
+                  variant="h5"
+                  component="h2"
+                  className={classes.cardTitle}
+                >
+                  {tip.data.name}
+                </Typography>
+                <Typography>
+                  {tip.data.description || "Pas de description"}
+                </Typography>
+              </CardContent>
+            </CardActionArea>
+          </Card>
+        </Grid>
+
+      ));
+
     return (
       <React.Fragment>
         <div className={classes.pageContent}>
           <KeyboardReturnIcon className={classes.backFAB} onClick={() => { this.back(); }} />
           {charging ? <CenteredCircularProgress /> :
-            <Grid container className={classes.root} >
-              <Grid>
-                <Grid container spacing={5}>
-                  {renderTips}
+            tips.length > 0 ?
+              <Grid container className={classes.root} >
+                <Grid>
+                  <Grid container spacing={5}>
+                    {renderTips}
+                  </Grid>
                 </Grid>
               </Grid>
-            </Grid>
+              :
+              <React.Fragment>
+                <Grid
+                  container
+                  direction="column"
+                  alignItems="center"
+                  justify="center"
+                  style={{ minHeight: '70vh' }}
+                >
+                  <Grid item xs={12} sm={6}>
+                    <h2>Il n'y a aucune astuce ici :'(</h2>
+                    <p>N'hésite pas à en ajouter une ;)</p>
+                  </Grid>
+                </Grid>
+              </React.Fragment>
           }
         </div>
         <Fab aria-label="add" className={classes.floatingActionButton}>

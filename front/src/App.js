@@ -88,6 +88,11 @@ const styles = theme => ({
     top: 15,
     align: "right",
   },
+  menuItem: {
+    padding: 10,
+    paddingLeft: 30,
+    paddingRight: 30
+  }
 });
 
 class SearchAppBar extends React.Component {
@@ -234,7 +239,7 @@ class SearchAppBar extends React.Component {
                   :
                   <Avatar alt=""></Avatar>}
                 <div>
-                  <Popper open={isMenuOpen} anchorEl={this.inputRef} role={undefined} transition >
+                  <Popper open={isMenuOpen} anchorEl={this.inputRef} role={undefined} transition>
                     {({ TransitionProps }) => (
                       <Grow
                         {...TransitionProps}
@@ -247,14 +252,14 @@ class SearchAppBar extends React.Component {
                             });
                           }}>
                             <MenuList autoFocusItem={isMenuOpen} id="menu-list-grow" onKeyDown={(event) => { this.handleListKeyDown(event); }}>
-                              <MenuItem onClick={() => {
+                              <MenuItem className={classes.menuItem} onClick={() => {
                                 this.setState({
                                   openMyAccount: true
                                 })
                               }}>
                                 Mon compte
                               </MenuItem>
-                              <MenuItem onClick={() => {
+                              <MenuItem className={classes.menuItem} onClick={() => {
                                 localStorage["currentUserId"] = null;
                                 this.setState({
                                   isAUserConnected: false,
