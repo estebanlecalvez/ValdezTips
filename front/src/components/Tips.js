@@ -9,6 +9,8 @@ import {
   Fab,
   Button,
   TextField,
+  Avatar,
+  CircularProgress,
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import FullscreenIcon from '@material-ui/icons/Fullscreen';
@@ -88,7 +90,7 @@ class Tips extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = { open: false, name: "", description: "", text: "", tips: [], isDialogFullScreen: false, gameId: this.props.match.params.id, charging: true };
+    this.state = { open: false, name: "", description: "", text: "", newTips: null, tips: null, isThereAnyData: true, isDialogFullScreen: false, gameId: this.props.match.params.id, charging: true };
     this.publishToFirestore = this.publishToFirestore.bind(this);
     this.fetchTips = this.fetchTips.bind(this);
     this.handleClose = this.handleClose.bind(this);
@@ -96,13 +98,13 @@ class Tips extends React.Component {
   }
 
   publishToFirestore() {
-
     if (this.state.name && this.state.text) {
       const db = firebase.firestore();
       db
         .collection("tips")
         .add({
           gameId: this.props.match.params.id,
+          userId: localStorage["currentUserId"],
           name: this.state.name,
           description: this.state.description,
           text: this.state.text,
@@ -130,22 +132,47 @@ class Tips extends React.Component {
   }
 
   fetchTips() {
-    this.setState({ charging: true });
     const db = firebase.firestore();
+    this.setState({ charging: true });
     db.collection("tips")
       .where("gameId", "==", this.props.match.params.id)
       .get()
-      .then(querySnapshot => {
-        const data = querySnapshot.docs.map(doc => {
-          return { id: doc.id, data: doc.data() };
-        });
-        this.setState({ tips: data, charging: false });
+      .then(snap => {
+        if (snap.docs.length === 0) {
+          this.setState({ isThereAnyData: false, charging: false });
+        } else {
+          const data = snap.docs.map(doc => {
+            return { id: doc.id, data: doc.data() };
+          });
+
+          let tipsWithUserInside = [];
+          let actualNumber = 0;
+          data.forEach((item, index, array) => {
+            if (item.data.userId) {
+              let userRef = db.collection("users").doc(item.data.userId);
+              userRef.get().then((user) => {
+                const updatedTipWithUser = { tip: item, userRef: user.data() };
+                tipsWithUserInside.push(updatedTipWithUser);
+                this.setState({ tips: tipsWithUserInside });
+                console.log(actualNumber + "/" + array.length + "... There is a user for this tip", item);
+              });
+            } else {
+              tipsWithUserInside.push({ tip: item, userRef: null });
+              this.setState({ tips: tipsWithUserInside });
+              console.log(actualNumber + "/" + array.length + "... There is no user for this tip", item);
+            }
+          });
+          this.setState({ charging: false });
+
+        }
       });
+
   }
 
   componentDidMount() {
     this.fetchTips();
   }
+
 
   handleClickOpen = () => {
     this.setState({ open: true });
@@ -181,6 +208,7 @@ class Tips extends React.Component {
       text: event.target.value
     });
   };
+
   goIntoTip(id) {
     let path = `/tip/` + id;
     this.props.history.push(path);
@@ -193,7 +221,7 @@ class Tips extends React.Component {
 
   render() {
     const { classes } = this.props;
-    const { charging } = this.state;
+    const { tips, isDialogFullScreen } = this.state;
     const modules = {
       toolbar: [
         [{ 'header': [1, 2, false] }],
@@ -210,62 +238,47 @@ class Tips extends React.Component {
       'list', 'bullet', 'indent',
       'link', 'image'
     ];
-    const { tips, isDialogFullScreen } = this.state;
-    var renderTips =
-      tips.map(tip => (
-        <Grid key={tip.id} xs={"auto"} item>
-          <Card
-            className={classes.card}
-            onClick={() => this.goIntoTip(tip.id)}
-          >
-            <CardActionArea>
-              <CardContent>
-                <Typography
-                  gutterBottom
-                  variant="h5"
-                  component="h2"
-                  className={classes.cardTitle}
-                >
-                  {tip.data.name}
-                </Typography>
-                <Typography>
-                  {tip.data.description || "Pas de description"}
-                </Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-        </Grid>
 
-      ));
 
     return (
       <React.Fragment>
         <div className={classes.pageContent}>
           <KeyboardReturnIcon className={classes.backFAB} onClick={() => { this.back(); }} />
-          {charging ? <CenteredCircularProgress /> :
-            tips.length > 0 ?
-              <Grid container className={classes.root} >
-                <Grid>
-                  <Grid container spacing={5}>
-                    {renderTips}
-                  </Grid>
+          {this.state.charging ? <CenteredCircularProgress /> :
+            <Grid container className={classes.root} >
+              <Grid>
+                <Grid container spacing={5}>
+
+                  {this.state.isThereAnyData && this.state.tips != null ?
+                    this.state.tips.map(tip => (
+                      <Grid key={tip.tip.id} xs={"auto"} item>
+                        <Card
+                          className={classes.card}
+                          onClick={() => this.goIntoTip(tip.tip.id)}
+                        >
+                          <CardActionArea>
+                            <CardContent>
+                              <Typography
+                                gutterBottom
+                                variant="h5"
+                                component="h2"
+                                className={classes.cardTitle}
+                              >
+                                {tip.tip.data.name}
+                              </Typography>
+                              <Typography>
+                                {tip.tip.data.description || "Pas de description"}
+                              </Typography>
+                              {tip.userRef != null ? <Avatar src={tip.userRef.image} alt=""></Avatar>
+                                : <p>Utilisateur inconnu.</p>}
+                            </CardContent>
+                          </CardActionArea>
+                        </Card>
+                      </Grid>))
+                    : this.state.tips === null && !this.state.isThereAnyData ? <p> Pas de data</p> : null}
                 </Grid>
               </Grid>
-              :
-              <React.Fragment>
-                <Grid
-                  container
-                  direction="column"
-                  alignItems="center"
-                  justify="center"
-                  style={{ minHeight: '70vh' }}
-                >
-                  <Grid item xs={12} sm={6}>
-                    <h2>Il n'y a aucune astuce ici :'(</h2>
-                    <p>N'hésite pas à en ajouter une ;)</p>
-                  </Grid>
-                </Grid>
-              </React.Fragment>
+            </Grid>
           }
         </div>
         <Fab aria-label="add" className={classes.floatingActionButton}>
