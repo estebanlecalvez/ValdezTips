@@ -11,6 +11,7 @@ import {
   TextField,
   Avatar,
   CircularProgress,
+  CardActions,
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import FullscreenIcon from '@material-ui/icons/Fullscreen';
@@ -45,7 +46,7 @@ const styles = theme => ({
   },
   card: {
     minWidth: 50,
-    maxHeight: 200,
+    maxHeight: 250,
     width: 300,
     maxWidth: "90vw"
   },
@@ -80,6 +81,10 @@ const styles = theme => ({
     cursor: 'pointer',
     color: "blue",
   },
+  cardAvatar: {
+    marginLeft: 'auto',
+    marginBottom: 10
+  }
 });
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -154,12 +159,10 @@ class Tips extends React.Component {
                 const updatedTipWithUser = { tip: item, userRef: user.data() };
                 tipsWithUserInside.push(updatedTipWithUser);
                 this.setState({ tips: tipsWithUserInside });
-                console.log(actualNumber + "/" + array.length + "... There is a user for this tip", item);
               });
             } else {
               tipsWithUserInside.push({ tip: item, userRef: null });
               this.setState({ tips: tipsWithUserInside });
-              console.log(actualNumber + "/" + array.length + "... There is no user for this tip", item);
             }
           });
           this.setState({ charging: false });
@@ -269,13 +272,39 @@ class Tips extends React.Component {
                               <Typography>
                                 {tip.tip.data.description || "Pas de description"}
                               </Typography>
-                              {tip.userRef != null ? <Avatar src={tip.userRef.image} alt=""></Avatar>
-                                : <p>Utilisateur inconnu.</p>}
                             </CardContent>
+                            <CardActions>
+                              {tip.userRef != null ?
+                                <React.Fragment>
+                                  <Typography className={classes.cardAvatar}>{tip.userRef.name}</Typography>
+                                  <Avatar className={classes.cardAvatar} src={tip.userRef.image} alt=""></Avatar>
+                                </React.Fragment>
+                                : <React.Fragment>
+                                  <Typography className={classes.cardAvatar}>Utilisateur inconnu</Typography>
+                                  <Avatar className={classes.cardAvatar} children='?' alt=""></Avatar>
+                                </React.Fragment>
+                              }
+                            </CardActions>
+
                           </CardActionArea>
                         </Card>
                       </Grid>))
-                    : this.state.tips === null && !this.state.isThereAnyData ? <p> Pas de data</p> : null}
+                    : this.state.tips === null && !this.state.isThereAnyData ?
+                      <React.Fragment>
+                        <Grid
+                          container
+                          direction="column"
+                          alignItems="center"
+                          justify="center"
+                          style={{ minHeight: '60vh' }}
+                        >
+                          <Grid item xs={12} sm={6}>
+                            <h1> Il n'y a rien ici... :'(</h1>
+                            <p>N'hésite pas à ajouter des astuces</p>
+                          </Grid>
+                        </Grid>
+                      </React.Fragment>
+                      : null}
                 </Grid>
               </Grid>
             </Grid>
