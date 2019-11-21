@@ -41,12 +41,12 @@ const styles = theme => ({
 
   card: {
     minWidth: 50,
-    maxHeight: 200,
+    maxHeight: 210,
     width: 300,
     maxWidth: "90vw"
   },
   media: {
-    height: 140
+    height: 150
   },
   cardTitle: {
     align: "center"

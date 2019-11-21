@@ -8,7 +8,7 @@ import SearchIcon from "@material-ui/icons/Search";
 import AcUnitIcon from "@material-ui/icons/AcUnit";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import FoldersPage from "./components/FoldersPage";
-import { Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem, Avatar, Dialog, DialogTitle, DialogContent, TextField, Typography, CircularProgress, Container, Link } from "@material-ui/core";
+import { Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem, Avatar, Dialog, DialogTitle, DialogContent, TextField, Typography, CircularProgress, Container, Link, CardMedia, Card } from "@material-ui/core";
 import Tips from "./components/Tips";
 import Tip from "./components/Tip";
 import { withStyles } from "@material-ui/core/styles";
@@ -17,6 +17,7 @@ import Login from "./components/Login";
 import MyAccount from "./components/MyAccount";
 import CreateIcon from '@material-ui/icons/Create';
 import CenteredCircularProgress from "./utilsComponents/CenteredCircularProgress";
+import { isAbsolute } from "path";
 
 const styles = theme => ({
   root: {
@@ -103,6 +104,13 @@ const styles = theme => ({
   searchResults: {
     width: "auto"
   },
+  card: {
+    height: 50,
+    width: 80
+  },
+  media: {
+    height: 50,
+  }
 });
 
 class SearchAppBar extends React.Component {
@@ -154,7 +162,14 @@ class SearchAppBar extends React.Component {
   goIntoFolder(id) {
     console.log(this.props);
     let path = `/folders/` + id;
-    this.props.history.push(path);
+    window.location.href = path;
+
+  }
+
+  goIntoTip(id) {
+    console.log(this.props);
+    let path = `/tip/` + id;
+    window.location.href = path;
   }
 
   fetchFoldersAndTips() {
@@ -370,8 +385,15 @@ class SearchAppBar extends React.Component {
                                   </Typography>
                                   {this.state.searchResults.folders != null ?
                                     this.state.searchResults.folders.map(folder => (
-                                      <MenuItem className={classes.menuItemFolders}>
-                                        <Avatar src={folder.data.image} />
+                                      <MenuItem className={classes.menuItemFolders} onClick={() => {
+                                        this.goIntoFolder(folder.id)
+                                      }}>
+                                        <Card className={classes.card}>
+                                          <CardMedia
+                                            className={classes.media}
+                                            image={folder.data.image} />
+
+                                        </Card>
                                         <p className={classes.menuItemFoldersName}>{folder.data.name}</p>
 
                                       </MenuItem>
@@ -386,7 +408,9 @@ class SearchAppBar extends React.Component {
                                   </Typography>
                                   {this.state.searchResults.tips != null ?
                                     this.state.searchResults.tips.map(tip => (
-                                      <MenuItem>
+                                      <MenuItem onClick={() => {
+                                        this.goIntoTip(tip.id)
+                                      }}>
                                         {tip.data.name}
                                       </MenuItem>
                                     ))
