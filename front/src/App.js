@@ -8,7 +8,7 @@ import SearchIcon from "@material-ui/icons/Search";
 import AcUnitIcon from "@material-ui/icons/AcUnit";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import FoldersPage from "./components/FoldersPage";
-import { Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem, Avatar, Dialog, DialogTitle, DialogContent, TextField, Typography } from "@material-ui/core";
+import { Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem, Avatar, Dialog, DialogTitle, DialogContent, TextField, Typography, CircularProgress, Container, Link } from "@material-ui/core";
 import Tips from "./components/Tips";
 import Tip from "./components/Tip";
 import { withStyles } from "@material-ui/core/styles";
@@ -16,6 +16,7 @@ import firebase from 'firebase';
 import Login from "./components/Login";
 import MyAccount from "./components/MyAccount";
 import CreateIcon from '@material-ui/icons/Create';
+import CenteredCircularProgress from "./utilsComponents/CenteredCircularProgress";
 
 const styles = theme => ({
   root: {
@@ -67,12 +68,9 @@ const styles = theme => ({
   inputInput: {
     padding: theme.spacing(1, 1, 1, 7),
     transition: theme.transitions.create("width"),
-    width: "100%",
+    width: 200,
     [theme.breakpoints.up("sm")]: {
-      width: 120,
-      "&:focus": {
-        width: 200
-      }
+      width: 200,
     }
   },
   appbar: {
@@ -92,14 +90,17 @@ const styles = theme => ({
     padding: 10,
     paddingLeft: 30,
     paddingRight: 30
-  }
+  },
+  searchResults: {
+    width: 250
+  },
 });
 
 class SearchAppBar extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { isAUserConnected: false, searchTerms: null, charging: false, isMenuOpen: false, openMyAccount: false, user: null, modifiedMyAccount: false };
+    this.state = { isSearchCharging: false, isAUserConnected: false, searchTerms: null, charging: false, searchResults: null, searchResultsUnfiltered: null, isMenuOpen: false, isSearchMenuOpen: false, openMyAccount: false, user: null, modifiedMyAccount: false };
     this.inputRef = null;
   }
 
@@ -141,6 +142,39 @@ class SearchAppBar extends React.Component {
 
   }
 
+  goIntoFolder(id) {
+    console.log(this.props);
+    let path = `/folders/` + id;
+    this.props.history.push(path);
+  }
+
+  search(value) {
+    if (value.length > 1) {
+      this.setState({ isSearchCharging: true });
+      const db = firebase.firestore();
+      db.collection("folders")
+        .get()
+        .then(querySnapshot => {
+          const data = querySnapshot.docs.map(doc => {
+            return { id: doc.id, data: doc.data() };
+          });
+          this.setState({ searchResultsUnfiltered: data });
+        });
+      const results = [];
+      if (this.state.searchResultsUnfiltered) {
+        this.state.searchResultsUnfiltered.forEach((result, index) => {
+          if (result.data.name.includes(value)) {
+            results.push(result);
+          }
+          if (index == this.state.searchResultsUnfiltered.length - 1) {
+            this.setState({ searchResults: results, isSearchCharging: false });
+          }
+        })
+      }
+    }
+
+  }
+
   handleListKeyDown(event) {
     if (event.key === 'Tab') {
       event.preventDefault();
@@ -151,7 +185,7 @@ class SearchAppBar extends React.Component {
 
   render() {
     const { classes } = this.props;
-    const { isAUserConnected, user, isMenuOpen, modifiedMyAccount } = this.state;
+    const { isAUserConnected, user, isMenuOpen, isSearchMenuOpen, modifiedMyAccount, isSearchCharging } = this.state;
 
     const myAccount = <Dialog
       open={this.state.openMyAccount}
@@ -218,12 +252,20 @@ class SearchAppBar extends React.Component {
                   </div>
 
                   <InputBase
-                    placeholder="Search…"
+                    placeholder="Search for game..."
                     classes={{
                       root: classes.inputRoot,
                       input: classes.inputInput
                     }}
+                    onClick={() => { this.setState({ isSearchMenuOpen: !isSearchMenuOpen }) }}
+                    onChange={(event) => {
+                      this.setState({ isSearchMenuOpen: true });
+                      this.search(event.target.value);
+                    }}
                     inputProps={{ "aria-label": "search" }}
+                    aria-controls={isSearchMenuOpen ? 'menu-list-grow' : undefined}
+                    aria-haspopup="true"
+                    ref={searchMenuRef => { this.searchMenuRef = searchMenuRef }}
                   />
                 </div>
                 {user ?
@@ -268,6 +310,37 @@ class SearchAppBar extends React.Component {
                                 Déconnexion
                               </MenuItem>
                             </MenuList>
+                          </ClickAwayListener>
+                        </Paper>
+                      </Grow>
+                    )}
+                  </Popper>
+                </div>
+                <div>
+                  <Popper open={isSearchMenuOpen} anchorEl={this.searchMenuRef} role={undefined} transition>
+                    {({ TransitionProps }) => (
+                      <Grow
+                        {...TransitionProps}
+                        style={{ transformOrigin: 'auto' }}
+                      >
+                        <Paper className={classes.searchResults}>
+                          <ClickAwayListener onClickAway={() => {
+                            this.setState({
+                              isSearchMenuOpen: false
+                            });
+                          }}>
+                            {isSearchCharging || this.state.searchResults == null ? <Container>
+                              <CircularProgress />
+                            </Container> :
+                              this.state.searchResults != null && this.state.searchResults.length ?
+                                <MenuList id="search-menu-grow" >
+                                  {this.state.searchResults.map((result) =>
+                                    <MenuItem >
+                                      <Avatar src={result.data.image} />{result.data.name}
+                                    </MenuItem>
+                                  )}
+                                </MenuList>
+                                : <CircularProgress />}
                           </ClickAwayListener>
                         </Paper>
                       </Grow>

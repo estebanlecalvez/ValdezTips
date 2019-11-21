@@ -1,7 +1,6 @@
 import React from "react";
-import { withStyles } from "@material-ui/styles";
 import firebase from "firebase";
-import { Container, Dialog, DialogContent, DialogTitle, Button, DialogActions, TextField, Card, CardContent, IconButton, CardHeader, Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem } from "@material-ui/core";
+import { Container, Dialog, DialogContent, DialogTitle, Button, DialogActions, TextField, Card, CardContent, IconButton, CardHeader, Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem, CardActions, Avatar, Typography, Tooltip, withStyles } from "@material-ui/core";
 import FullscreenIcon from '@material-ui/icons/Fullscreen';
 import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
 import ReactQuill from "react-quill";
@@ -15,20 +14,6 @@ const styles = ({
     marginLeft: "5vw",
     marginRight: "5vw",
     marginBottom: 10,
-    "& img": {
-      maxWidth: "40vw",
-      maxHeight: "40vh",
-      display: "block",
-      marginLeft: "auto",
-      marginRight: "auto",
-      transition: "0.3s",
-      "&:hover": {
-        height: "auto",
-        maxHeight: "95vh",
-        maxWidth: "80vw",
-        width: "auto"
-      }
-    }
   },
   paper: {
     height: 140,
@@ -62,10 +47,30 @@ const styles = ({
     marginBottom: 10,
     marginRight: 10
   },
+  cardContent: {
+    "& img": {
+      maxWidth: "40vw",
+      maxHeight: "40vh",
+      display: "block",
+      marginLeft: "auto",
+      marginRight: "auto",
+      transition: "0.3s",
+      "&:hover": {
+        height: "auto",
+        maxHeight: "95vh",
+        maxWidth: "80vw",
+        width: "auto"
+      }
+    }
+  },
+  cardAvatar: {
+    marginLeft: 'auto',
+    marginBottom: 10
+  },
   tipTitle: {
     fontSize: "20px",
     textAlign: "center"
-  }
+  },
 });
 
 class Tip extends React.Component {
@@ -96,7 +101,7 @@ class Tip extends React.Component {
   }
 
   back() {
-    let path = `/folders/` + this.state.tip.gameId;
+    let path = `/folders/` + this.state.tip.tip.gameId;
     this.props.history.push(path);
   }
 
@@ -108,13 +113,29 @@ class Tip extends React.Component {
     docRef.get().then(doc => {
       if (doc.exists) {
         currentTip = doc.data();
-        this.setState({
-          tip: currentTip,
-          newtext: currentTip.text,
-          newdesc: currentTip.description,
-          newname: currentTip.name,
-          charging: false
-        })
+        if (currentTip.userId) {
+          console.log("this tip have a user id");
+          let userRef = db.collection("users").doc(currentTip.userId);
+          userRef.get().then((user) => {
+            let userDoc = user.data();
+            this.setState({
+              tip: { tip: currentTip, currentUser: userDoc },
+              newtext: currentTip.text,
+              newdesc: currentTip.description,
+              newname: currentTip.name,
+              charging: false
+            })
+          })
+        } else {
+          this.setState({
+            tip: { tip: currentTip, currentUser: null },
+            newtext: currentTip.text,
+            newdesc: currentTip.description,
+            newname: currentTip.name,
+            charging: false
+          })
+        }
+
       } else {
         // doc.data() will be undefined in this case
         console.error("No such document!");
@@ -136,7 +157,7 @@ class Tip extends React.Component {
     }).catch(function (error) {
       console.error("Error removing document: ", error);
     });
-    this.props.history.push("/folders/" + this.state.tip.gameId);
+    this.props.history.push("/folders/" + this.state.tip.tip.gameId);
   }
 
 
@@ -156,7 +177,7 @@ class Tip extends React.Component {
       text: this.state.newtext,
       description: this.state.newdesc,
       name: this.state.newname,
-      createdOn: this.state.tip.createdOn,
+      createdOn: this.state.tip.tip.createdOn,
       lastModifiedOn: new Date()
     }).then(() => {
       this.handleClickCloseModification();
@@ -222,7 +243,6 @@ class Tip extends React.Component {
 
           {charging ? <CenteredCircularProgress /> : (
             <React.Fragment>
-
               <KeyboardReturnIcon className={classes.backFAB} onClick={() => { this.back(); }} />
               <Card elevation={5} className={classes.card} >
                 <CardHeader
@@ -235,9 +255,20 @@ class Tip extends React.Component {
                       />
                     </IconButton>
                   }
-                  title={tip.name}
-                  subheader={"Créé le: " + this.formatDate(tip.createdOn.seconds)}
+                  title={tip.tip.name}
+                  subheader={<React.Fragment>Créé le: {this.formatDate(tip.tip.createdOn.seconds)}  {tip.currentUser != null ?
+                    <div>
+                      <Tooltip title={tip.currentUser.name} placement="right">
+                        <Avatar src={tip.currentUser.image} alt=""></Avatar>
+                      </Tooltip>
+                    </div>
+                    : <Tooltip title="Utilisateur inconnu" placement="right">
+                      <Avatar children="?" alt=""></Avatar>
+                    </Tooltip>
+                  }</React.Fragment>}
+
                 />
+
                 <div>
                   <Popper open={isMenuOpen} anchorEl={this.inputRef} role={undefined} transition disablePortal>
                     {({ TransitionProps, placement }) => (
@@ -252,10 +283,10 @@ class Tip extends React.Component {
                             });
                           }}>
                             <MenuList autoFocusItem={isMenuOpen} id="menu-list-grow" onKeyDown={(event) => { this.handleListKeyDown(event); }}>
-                              <MenuItem onClick={this.handleClickOpenModification} style={{ color: "darkGreen" }} >
+                              <MenuItem onClick={this.handleClickOpenModification}  >
                                 Modifier
                               </MenuItem>
-                              <MenuItem onClick={this.handleClickOpenDeletion} style={{ color: "darkRed" }} >
+                              <MenuItem onClick={this.handleClickOpenDeletion} >
                                 Supprimer
                               </MenuItem>
                             </MenuList>
@@ -267,11 +298,12 @@ class Tip extends React.Component {
                 </div>
                 <Container className={classes.modifyBtnContainer}>
                 </Container>
-                <CardContent>
-                  <div dangerouslySetInnerHTML={{ __html: tip.text }}></div>
+                <CardContent className={classes.cardContent}>
+                  <div dangerouslySetInnerHTML={{ __html: tip.tip.text }}></div>
                 </CardContent>
-                <Container className={classes.deleteBtnContainer}>
-                </Container>
+                <CardActions>
+
+                </CardActions>
               </Card>
 
             </React.Fragment>
