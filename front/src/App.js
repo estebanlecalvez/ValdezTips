@@ -91,13 +91,21 @@ const styles = theme => ({
     paddingLeft: 30,
     paddingRight: 30
   },
+  menuItemFolders: {
+    paddingLeft: 5,
+    paddingRight: 5,
+    paddingTop: 0,
+    paddingBottom: 5
+  },
+  menuItemFoldersName: {
+    marginLeft: 10
+  },
   searchResults: {
-    width: 250
+    width: "auto"
   },
 });
 
 class SearchAppBar extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = { isSearchCharging: false, isAUserConnected: false, searchTerms: null, charging: false, searchResults: null, searchResultsUnfiltered: null, isMenuOpen: false, isSearchMenuOpen: false, openMyAccount: false, user: null, modifiedMyAccount: false };
@@ -110,6 +118,7 @@ class SearchAppBar extends React.Component {
       this.setState({
         isAUserConnected: true
       });
+      this.fetchFoldersAndTips();
       this.getUser();
     } else {
       this.setState({
@@ -148,8 +157,8 @@ class SearchAppBar extends React.Component {
     this.props.history.push(path);
   }
 
-  search(value) {
-    this.setState({ isSearchCharging: true });
+  fetchFoldersAndTips() {
+    const results = { tips: [], folders: [] };
     const db = firebase.firestore();
     db.collection("folders")
       .get()
@@ -157,20 +166,43 @@ class SearchAppBar extends React.Component {
         const data = querySnapshot.docs.map(doc => {
           return { id: doc.id, data: doc.data() };
         });
-        this.setState({ searchResultsUnfiltered: data });
+        results.folders.push(data);
       });
-    const results = [];
-    if (this.state.searchResultsUnfiltered) {
-      this.state.searchResultsUnfiltered.forEach((result, index) => {
+    db.collection("tips")
+      .get()
+      .then(querySnapshot => {
+        const data = querySnapshot.docs.map(doc => {
+          return { id: doc.id, data: doc.data() };
+        });
+        results.tips.push(data);
+      });
+    this.setState({ searchResultsUnfiltered: results });
+    console.log("See all the results : ", results);
+  }
+
+
+  search(value) {
+    const results = { tips: [], folders: [] };
+    this.setState({ isSearchCharging: true });
+    if (this.state.searchResultsUnfiltered.folders[0]) {
+      this.state.searchResultsUnfiltered.folders[0].forEach((result, index) => {
         if (result.data.name.toLowerCase().includes(value.toLowerCase())) {
-          results.push(result);
+          results.folders.push(result);
         }
-        if (index == this.state.searchResultsUnfiltered.length - 1) {
-          this.setState({ searchResults: results, isSearchCharging: false });
+        // if (index == this.state.searchResultsUnfiltered.length - 1) {
+        //   this.setState({ searchResults: results, isSearchCharging: false });
+        // }
+      })
+    }
+    if (this.state.searchResultsUnfiltered.tips[0]) {
+      this.state.searchResultsUnfiltered.tips[0].forEach((result, index) => {
+        if (result.data.name.toLowerCase().includes(value.toLowerCase())) {
+          results.tips.push(result);
         }
       })
     }
-
+    console.log("current searchResults after foreaching each folders and tips:", this.state.searchResults);
+    this.setState({ searchResults: results, isSearchCharging: false });
 
   }
 
@@ -328,18 +360,41 @@ class SearchAppBar extends React.Component {
                               isSearchMenuOpen: false
                             });
                           }}>
-                            {isSearchCharging || this.state.searchResults == null ? <Container>
-                              <CircularProgress />
-                            </Container> :
-                              this.state.searchResults != null && this.state.searchResults.length ?
-                                <MenuList id="search-menu-grow" >
-                                  {this.state.searchResults.map((result) =>
-                                    <MenuItem >
-                                      <Avatar src={result.data.image} />{result.data.name}
-                                    </MenuItem>
-                                  )}
-                                </MenuList>
-                                : <CircularProgress />}
+                            <MenuList id="search-menu-grow" >
+                              {this.state.searchResults == null ? <Container>
+                                <CircularProgress />
+                              </Container> :
+                                <div>
+                                  <Typography key="folders_title" style={{ color: "darkBlue" }}>
+                                    Jeux
+                                  </Typography>
+                                  {this.state.searchResults.folders != null ?
+                                    this.state.searchResults.folders.map(folder => (
+                                      <MenuItem className={classes.menuItemFolders}>
+                                        <Avatar src={folder.data.image} />
+                                        <p className={classes.menuItemFoldersName}>{folder.data.name}</p>
+
+                                      </MenuItem>
+                                    ))
+
+
+                                    :
+                                    null
+                                  }
+                                  <Typography key="folders_title" style={{ color: "darkBlue" }}>
+                                    Tips
+                                  </Typography>
+                                  {this.state.searchResults.tips != null ?
+                                    this.state.searchResults.tips.map(tip => (
+                                      <MenuItem>
+                                        {tip.data.name}
+                                      </MenuItem>
+                                    ))
+                                    :
+                                    null}
+                                </div>
+                              }
+                            </MenuList>
                           </ClickAwayListener>
                         </Paper>
                       </Grow>
