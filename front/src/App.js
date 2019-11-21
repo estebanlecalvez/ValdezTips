@@ -149,29 +149,28 @@ class SearchAppBar extends React.Component {
   }
 
   search(value) {
-    if (value.length > 1) {
-      this.setState({ isSearchCharging: true });
-      const db = firebase.firestore();
-      db.collection("folders")
-        .get()
-        .then(querySnapshot => {
-          const data = querySnapshot.docs.map(doc => {
-            return { id: doc.id, data: doc.data() };
-          });
-          this.setState({ searchResultsUnfiltered: data });
+    this.setState({ isSearchCharging: true });
+    const db = firebase.firestore();
+    db.collection("folders")
+      .get()
+      .then(querySnapshot => {
+        const data = querySnapshot.docs.map(doc => {
+          return { id: doc.id, data: doc.data() };
         });
-      const results = [];
-      if (this.state.searchResultsUnfiltered) {
-        this.state.searchResultsUnfiltered.forEach((result, index) => {
-          if (result.data.name.includes(value)) {
-            results.push(result);
-          }
-          if (index == this.state.searchResultsUnfiltered.length - 1) {
-            this.setState({ searchResults: results, isSearchCharging: false });
-          }
-        })
-      }
+        this.setState({ searchResultsUnfiltered: data });
+      });
+    const results = [];
+    if (this.state.searchResultsUnfiltered) {
+      this.state.searchResultsUnfiltered.forEach((result, index) => {
+        if (result.data.name.toLowerCase().includes(value.toLowerCase())) {
+          results.push(result);
+        }
+        if (index == this.state.searchResultsUnfiltered.length - 1) {
+          this.setState({ searchResults: results, isSearchCharging: false });
+        }
+      })
     }
+
 
   }
 
