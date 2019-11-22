@@ -110,6 +110,13 @@ const styles = theme => ({
   },
   media: {
     height: 50,
+  },
+  menuTitle: {
+    backgroundColor: "#f5f5f5",
+    padding: 5,
+    paddingLeft: 15,
+    fontSize: 18,
+    color: "#750000"
   }
 });
 
@@ -303,7 +310,11 @@ class SearchAppBar extends React.Component {
                       root: classes.inputRoot,
                       input: classes.inputInput
                     }}
-                    onClick={() => { this.setState({ isSearchMenuOpen: !isSearchMenuOpen }) }}
+                    onClick={() => {
+                      if (this.state.searchResults != null) {
+                        this.setState({ isSearchMenuOpen: !isSearchMenuOpen });
+                      }
+                    }}
                     onChange={(event) => {
                       this.setState({ isSearchMenuOpen: true });
                       this.search(event.target.value);
@@ -380,7 +391,7 @@ class SearchAppBar extends React.Component {
                                 <CircularProgress />
                               </Container> :
                                 <div>
-                                  <Typography key="folders_title" style={{ color: "darkBlue" }}>
+                                  <Typography className={classes.menuTitle} key="folders_title" >
                                     Jeux
                                   </Typography>
                                   {this.state.searchResults.folders != null ?
@@ -403,7 +414,7 @@ class SearchAppBar extends React.Component {
                                     :
                                     null
                                   }
-                                  <Typography key="folders_title" style={{ color: "darkBlue" }}>
+                                  <Typography className={classes.menuTitle} key="tips_title">
                                     Tips
                                   </Typography>
                                   {this.state.searchResults.tips != null ?
