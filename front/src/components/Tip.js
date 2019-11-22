@@ -117,7 +117,10 @@ class Tip extends React.Component {
           console.log("this tip have a user id");
           let userRef = db.collection("users").doc(currentTip.userId);
           userRef.get().then((user) => {
-            let userDoc = user.data();
+
+            let userDoc = { id: user.id, data: user.data() };
+            console.log(userDoc);
+            console.log(userDoc.id);
             this.setState({
               tip: { tip: currentTip, currentUser: userDoc },
               newtext: currentTip.text,
@@ -247,19 +250,24 @@ class Tip extends React.Component {
               <Card elevation={5} className={classes.card} >
                 <CardHeader
                   action={
-                    <IconButton aria-label="settings"
-                      onClick={() => { this.setState({ isMenuOpen: !isMenuOpen }) }}>
-                      <MoreVertIcon ref={inputRef => { this.inputRef = inputRef }}
-                        aria-controls={isMenuOpen ? 'menu-list-grow' : undefined}
-                        aria-haspopup="true"
-                      />
-                    </IconButton>
+                    tip.currentUser != null ?
+                      localStorage["currentUserId"] === tip.currentUser.id ?
+                        <IconButton aria-label="settings"
+                          onClick={() => { this.setState({ isMenuOpen: !isMenuOpen }) }}>
+                          <MoreVertIcon ref={inputRef => { this.inputRef = inputRef }}
+                            aria-controls={isMenuOpen ? 'menu-list-grow' : undefined}
+                            aria-haspopup="true"
+                          />
+                        </IconButton>
+                        :
+                        null
+                      : null
                   }
                   title={tip.tip.name}
                   subheader={<React.Fragment>Créé le: {this.formatDate(tip.tip.createdOn.seconds)}  {tip.currentUser != null ?
                     <div>
-                      <Tooltip title={tip.currentUser.name} placement="right">
-                        <Avatar src={tip.currentUser.image} alt=""></Avatar>
+                      <Tooltip title={tip.currentUser.data.name} placement="right">
+                        <Avatar src={tip.currentUser.data.image} alt=""></Avatar>
                       </Tooltip>
                     </div>
                     : <Tooltip title="Utilisateur inconnu" placement="right">

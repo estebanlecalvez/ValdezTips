@@ -47,6 +47,7 @@ class Login extends React.Component {
         if (email && password) {
             firebaseAuth.signInWithEmailAndPassword(email, password).then((response) => {
                 localStorage["currentUserId"] = response.user.uid;
+                this.getConnectedUser(response.user.uid);
                 this.setState({ isLoggedIn: true, token: response.user.getIdToken });
             }).catch((error) => {
                 this.setState({ error: error.message });
@@ -86,13 +87,25 @@ class Login extends React.Component {
         }
     }
 
+    getConnectedUser(id) {
+        const db = firebase.firestore();
+        var docRef = db.collection("users").doc(id);
+        docRef.get().then(doc => {
+            if (doc.exists) {
+                localStorage["currentUser"] = doc.data();
+            }
+        });
+    }
+
     doSignInWithGoogle() {
         firebase.auth().signInWithPopup(this.googleProvider).then((response) => {
             localStorage["currentUserId"] = response.user.uid;
             const data = response.user.providerData[0];
             this.addToFirestore(response.user.uid, data.email, data.displayName, data.displayName, data.displayName, data.photoURL);
+            this.getConnectedUser(response.user.uid);
             this.setState({ isLoggedIn: true, token: response.user.getIdToken });
         }).catch((error) => {
+            console.log("Error when sign in with google:", error);
         });
     }
 
