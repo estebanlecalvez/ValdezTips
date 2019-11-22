@@ -7,7 +7,7 @@ import ReactQuill from "react-quill";
 import CenteredCircularProgress from "../utilsComponents/CenteredCircularProgress";
 import KeyboardReturnIcon from '@material-ui/icons/KeyboardReturn';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-
+import "./Tip.css";
 const styles = ({
   keyboardReturnIcon: {
     marginTop: 10,
@@ -85,15 +85,30 @@ const styles = ({
   },
   tipContent: {
     marginTop: 30,
+  },
+  commentarySection: {
+    margin: 50,
   }
-
 
 });
 
 class Tip extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { tip: {}, isDialogFullScreen: false, charging: true, openModification: false, isMenuOpen: false, openDeletion: false, newname: "", newdesc: "", newtext: "" };
+    this.state = {
+      tip: {},
+      isDialogFullScreen: false,
+      charging: true,
+      openModification: false,
+      isMenuOpen: false,
+      openDeletion: false,
+      newname: "",
+      newdesc: "",
+      newtext: "",
+      commentText: null,
+      commentError: null,
+    };
+
     this.fetchTip = this.fetchTip.bind(this);
     this.deleteTip = this.deleteTip.bind(this);
     this.inputRef = null;
@@ -120,6 +135,30 @@ class Tip extends React.Component {
   back() {
     let path = `/folders/` + this.state.tip.tip.gameId;
     this.props.history.push(path);
+  }
+
+  sendComment() {
+    if (this.state.commentText) {
+      this.setState({ commentError: "" });
+      const db = firebase.firestore();
+      db
+        .collection("comments")
+        .add({
+          tipId: this.state.tip.id,
+          userId: localStorage["currentUserId"],
+          text: this.state.commentText,
+          sendDate: new Date(),
+          thumbsUp: 0,
+          thubmsDown: 0,
+          replies: []
+        })
+        .then(function () { })
+        .catch(function (error) {
+          console.error("Error writing document: ", error);
+        });
+    } else {
+      this.setState({ commentError: "Vous devez entrer un commentaire pour l'envoyer!" });
+    }
   }
 
   fetchTip() {
@@ -256,6 +295,12 @@ class Tip extends React.Component {
       'list', 'bullet', 'indent',
       'link', 'image'
     ];
+
+
+    let commentaires =
+      <React.Fragment>
+        Ici les commentaires ( modifier la variable commentaires dans Tip.js)
+      </React.Fragment>;
     return (
       <div className={classes.root}>
         <div className={classes.keyboardReturnIcon}>
@@ -326,6 +371,26 @@ class Tip extends React.Component {
               <div className={classes.tipContent} dangerouslySetInnerHTML={{ __html: tip.tip.text }}></div>
 
 
+              <div className={classes.commentarySection}>
+                {commentaires}
+                <div className={classes.tipTitle}>
+                  Poster un commentaire.
+                </div>
+                <div className={classes.reactQuill}>
+                  <ReactQuill
+                    theme="snow"
+                    modules={modules}
+                    formats={formats}
+                    onChange={(value) => {
+                      this.setState({ commentText: value });
+                    }}>
+                  </ReactQuill>
+                  {this.state.commentError}
+                  <Button onClick={() => {
+                    this.sendComment();
+                  }} className={classes.tipInfos} style={{ marginRight: "5vw" }}>Envoyer</Button>
+                </div>
+              </div>
             </React.Fragment>
           )
           }
