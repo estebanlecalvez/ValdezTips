@@ -16,8 +16,7 @@ import firebase from 'firebase';
 import Login from "./components/Login";
 import MyAccount from "./components/MyAccount";
 import CreateIcon from '@material-ui/icons/Create';
-import CenteredCircularProgress from "./utilsComponents/CenteredCircularProgress";
-import { isAbsolute } from "path";
+import "./App.css";
 
 const styles = theme => ({
   root: {

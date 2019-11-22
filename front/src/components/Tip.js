@@ -9,8 +9,14 @@ import KeyboardReturnIcon from '@material-ui/icons/KeyboardReturn';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 
 const styles = ({
-  pageContent: {
+  keyboardReturnIcon: {
     marginTop: 10,
+    marginLeft: "5vw",
+    marginRight: "5vw",
+    marginBottom: 10,
+  },
+  pageContent: {
+    marginTop: 50,
     marginLeft: "5vw",
     marginRight: "5vw",
     marginBottom: 10,
@@ -63,14 +69,25 @@ const styles = ({
       }
     }
   },
-  cardAvatar: {
-    marginLeft: 'auto',
-    marginBottom: 10
-  },
   tipTitle: {
-    fontSize: "20px",
-    textAlign: "center"
+    color: "#3F51B5",
+    fontSize: 20,
+    borderRadius: 5,
+    fontFamily: "arial",
+    left: 0,
+    padding: 10,
+    overflow: "hidden",
+    textAlign: "center",
   },
+  tipInfos: {
+    position: "absolute",
+    right: "5vw",
+  },
+  tipContent: {
+    marginTop: 30,
+  }
+
+
 });
 
 class Tip extends React.Component {
@@ -240,79 +257,74 @@ class Tip extends React.Component {
       'link', 'image'
     ];
     return (
-      <React.Fragment>
+      <div className={classes.root}>
+        <div className={classes.keyboardReturnIcon}>
+          <KeyboardReturnIcon className={classes.backFAB} onClick={() => { this.back(); }} />
+        </div>
 
         <div className={classes.pageContent}>
-
           {charging ? <CenteredCircularProgress /> : (
             <React.Fragment>
-              <KeyboardReturnIcon className={classes.backFAB} onClick={() => { this.back(); }} />
-              <Card elevation={5} className={classes.card} >
-                <CardHeader
-                  action={
-                    tip.currentUser != null ?
-                      localStorage["currentUserId"] === tip.currentUser.id ?
-                        <IconButton aria-label="settings"
-                          onClick={() => { this.setState({ isMenuOpen: !isMenuOpen }) }}>
-                          <MoreVertIcon ref={inputRef => { this.inputRef = inputRef }}
-                            aria-controls={isMenuOpen ? 'menu-list-grow' : undefined}
-                            aria-haspopup="true"
-                          />
-                        </IconButton>
-                        :
-                        null
-                      : null
-                  }
-                  title={tip.tip.name}
-                  subheader={<React.Fragment>Créé le: {this.formatDate(tip.tip.createdOn.seconds)}  {tip.currentUser != null ?
-                    <div>
-                      <Tooltip title={tip.currentUser.data.name} placement="right">
-                        <Avatar src={tip.currentUser.data.image} alt=""></Avatar>
-                      </Tooltip>
-                    </div>
-                    : <Tooltip title="Utilisateur inconnu" placement="right">
-                      <Avatar children="?" alt=""></Avatar>
-                    </Tooltip>
-                  }</React.Fragment>}
-
-                />
-
-                <div>
-                  <Popper open={isMenuOpen} anchorEl={this.inputRef} role={undefined} transition disablePortal>
-                    {({ TransitionProps, placement }) => (
-                      <Grow
-                        {...TransitionProps}
-                        style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}
-                      >
-                        <Paper>
-                          <ClickAwayListener onClickAway={() => {
-                            this.setState({
-                              isMenuOpen: false
-                            });
-                          }}>
-                            <MenuList autoFocusItem={isMenuOpen} id="menu-list-grow" onKeyDown={(event) => { this.handleListKeyDown(event); }}>
-                              <MenuItem onClick={this.handleClickOpenModification}  >
-                                Modifier
-                              </MenuItem>
-                              <MenuItem onClick={this.handleClickOpenDeletion} >
-                                Supprimer
-                              </MenuItem>
-                            </MenuList>
-                          </ClickAwayListener>
-                        </Paper>
-                      </Grow>
-                    )}
-                  </Popper>
+              <div>
+                <div className={classes.tipTitle}>
+                  {tip.tip.name.toUpperCase()}
                 </div>
-                <Container className={classes.modifyBtnContainer}>
-                </Container>
-                <CardContent className={classes.cardContent}>
-                  <div dangerouslySetInnerHTML={{ __html: tip.tip.text }}></div>
-                </CardContent>
-                <CardActions>
 
-                </CardActions>
-              </Card>
+                {tip.currentUser != null ?
+                  localStorage["currentUserId"] === tip.currentUser.id ?
+                    <IconButton className={classes.tipInfos} aria-label="settings"
+                      onClick={() => { this.setState({ isMenuOpen: !isMenuOpen }) }}>
+                      <MoreVertIcon ref={inputRef => { this.inputRef = inputRef }}
+                        aria-controls={isMenuOpen ? 'menu-list-grow' : undefined}
+                        aria-haspopup="true"
+                      />
+                    </IconButton>
+                    :
+                    null
+                  : null
+                }
+              </div>
+
+              Créé le: {this.formatDate(tip.tip.createdOn.seconds)}
+              {tip.currentUser != null ?
+                <div className={classes.tipInfosAvatar}>
+                  <Tooltip title={tip.currentUser.data.name} placement="right">
+                    <Avatar src={tip.currentUser.data.image} alt=""></Avatar>
+                  </Tooltip>
+                </div>
+                : <Tooltip title="Utilisateur inconnu" placement="right">
+                  <Avatar children="?" alt=""></Avatar>
+                </Tooltip>
+              }
+              <div>
+                <Popper open={isMenuOpen} anchorEl={this.inputRef} role={undefined} transition disablePortal>
+                  {({ TransitionProps, placement }) => (
+                    <Grow
+                      {...TransitionProps}
+                      style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}
+                    >
+                      <Paper>
+                        <ClickAwayListener onClickAway={() => {
+                          this.setState({
+                            isMenuOpen: false
+                          });
+                        }}>
+                          <MenuList autoFocusItem={isMenuOpen} id="menu-list-grow" onKeyDown={(event) => { this.handleListKeyDown(event); }}>
+                            <MenuItem onClick={this.handleClickOpenModification}  >
+                              Modifier
+                              </MenuItem>
+                            <MenuItem onClick={this.handleClickOpenDeletion} >
+                              Supprimer
+                              </MenuItem>
+                          </MenuList>
+                        </ClickAwayListener>
+                      </Paper>
+                    </Grow>
+                  )}
+                </Popper>
+              </div>
+              <div className={classes.tipContent} dangerouslySetInnerHTML={{ __html: tip.tip.text }}></div>
+
 
             </React.Fragment>
           )
@@ -396,7 +408,7 @@ class Tip extends React.Component {
             }
           </Dialog>
         </div>
-      </React.Fragment >
+      </div>
     );
   }
 }
