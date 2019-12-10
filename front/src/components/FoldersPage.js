@@ -27,6 +27,7 @@ import CenteredCircularProgress from "../utilsComponents/CenteredCircularProgres
 
 import ImageSelectPreview from 'react-image-select-pv';
 
+
 const styles = theme => ({
   root: {
     flexGrow: 1
@@ -208,9 +209,10 @@ class FoldersPage extends React.Component {
             </Grid>
           }
         </div>
-        <Fab aria-label="add" className={classes.floatingActionButton}>
-          <AddIcon onClick={this.handleClickOpen} />
+        <Fab onClick={this.handleClickOpen} aria-label="add" className={classes.floatingActionButton}>
+          <AddIcon />
         </Fab>
+
         <Dialog
           open={this.state.open}
           TransitionComponent={Transition}

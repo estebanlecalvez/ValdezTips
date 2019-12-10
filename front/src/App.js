@@ -128,7 +128,7 @@ class SearchAppBar extends React.Component {
 
   componentDidMount() {
     // Les valeurs dans le localStorage sont toujours des strings, pour ça qu'on vérifie "null" et non pas null
-    if (localStorage["currentUserId"] !== "null") {
+    if (localStorage["currentUserId"] !== "null" || localStorage["currentUserId"] != undefined) {
       this.setState({
         isAUserConnected: true
       });
@@ -142,7 +142,12 @@ class SearchAppBar extends React.Component {
   }
 
   getCurrentUserId() {
-    return localStorage["currentUserId"];
+    if (localStorage["currentUserId"]) {
+      return localStorage["currentUserId"];
+
+    } else {
+      return "noUser";
+    }
   }
 
   getUser() {

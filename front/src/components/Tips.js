@@ -26,6 +26,8 @@ import firebase from "firebase";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import CenteredCircularProgress from "../utilsComponents/CenteredCircularProgress";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const styles = theme => ({
   root: {
@@ -67,6 +69,11 @@ const styles = theme => ({
       color: "lightGrey"
     }
   },
+  toast: {
+    top: 20,
+    right: 20,
+    position: "fixed",
+  },
   textField: {
     width: "20vw"
   },
@@ -81,11 +88,14 @@ const styles = theme => ({
     cursor: 'pointer',
     color: "blue",
   },
+
   cardAvatar: {
     marginLeft: 'auto',
     marginBottom: 10
   }
 });
+
+
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -221,6 +231,7 @@ class Tips extends React.Component {
     let path = `/`;
     this.props.history.push(path);
   }
+  handleClickShowToast = () => toast("Wow so easy !");
 
   render() {
     const { classes } = this.props;
@@ -246,6 +257,8 @@ class Tips extends React.Component {
     return (
       <React.Fragment>
         <div className={classes.pageContent}>
+          <ToastContainer className={classes.toast} />
+
           <KeyboardReturnIcon className={classes.backFAB} onClick={() => { this.back(); }} />
           {this.state.charging ? <CenteredCircularProgress /> :
             <Grid container className={classes.root} >
@@ -310,8 +323,12 @@ class Tips extends React.Component {
             </Grid>
           }
         </div>
-        <Fab aria-label="add" className={classes.floatingActionButton}>
-          <AddIcon onClick={this.handleClickOpen} />
+        <Fab onClick={this.handleClickOpen} aria-label="add" className={classes.floatingActionButton}>
+          <AddIcon />
+        </Fab>
+
+        <Fab onClick={this.handleClickShowToast} aria-label="showtoast" >
+          <AddIcon />
         </Fab>
         <div>
           <Dialog
