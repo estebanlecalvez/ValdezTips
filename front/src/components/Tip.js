@@ -87,7 +87,26 @@ const styles = ({
     marginTop: 30,
   },
   commentarySection: {
-    margin: 50,
+    margin: "5vw",
+  },
+  commentaire: {
+    margin: 20,
+    border: "1px solid #f0f0f0",
+    borderRadius: 10,
+  },
+  commentaireHeader: {
+    margin: 20,
+  },
+  userAvatar: {
+    float: "left",
+    marginRight: 20,
+  },
+  commentContent: {
+    marginTop: 20,
+    padding: 20,
+    backgroundColor: "#f5f5f5",
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
   }
 
 });
@@ -107,6 +126,7 @@ class Tip extends React.Component {
       newtext: "",
       commentText: null,
       commentError: null,
+      commentaires: []
     };
 
     this.fetchTip = this.fetchTip.bind(this);
@@ -138,27 +158,34 @@ class Tip extends React.Component {
   }
 
   sendComment() {
-    if (this.state.commentText) {
-      this.setState({ commentError: "" });
+    const { commentText, commentaires } = this.state;
+    if (commentText) {
+      this.setState({
+        charging: true
+      });
       const db = firebase.firestore();
-      db
-        .collection("comments")
-        .add({
-          tipId: this.state.tip.id,
-          userId: localStorage["currentUserId"],
-          text: this.state.commentText,
-          sendDate: new Date(),
-          thumbsUp: 0,
-          thubmsDown: 0,
-          replies: []
-        })
-        .then(function () { })
-        .catch(function (error) {
+      var newCommentaires = commentaires;
+      console.log(localStorage["currentUserId"]);
+      var userRef = db.collection("users").doc(localStorage["currentUserId"]);
+      userRef.get().then((doc) => {
+        var user = doc.data();
+        console.log("successfully get the user.");
+        console.log(doc.data());
+        newCommentaires.push({ "content": commentText, "usersPseudo": user.pseudo, "usersImage": user.image, "usersId": localStorage["currentUserId"] });
+        this.setState({
+          commentError: "",
+        });
+        var docToUpdate = db.collection("tips").doc(this.props.match.params.id);
+        docToUpdate.update({
+          commentaires: newCommentaires
+        }).catch(function (error) {
           console.error("Error writing document: ", error);
         });
+      });
     } else {
       this.setState({ commentError: "Vous devez entrer un commentaire pour l'envoyer!" });
     }
+    this.setState({ charging: false, });
   }
 
   fetchTip() {
@@ -173,7 +200,6 @@ class Tip extends React.Component {
           console.log("this tip have a user id");
           let userRef = db.collection("users").doc(currentTip.userId);
           userRef.get().then((user) => {
-
             let userDoc = { id: user.id, data: user.data() };
             console.log(userDoc);
             console.log(userDoc.id);
@@ -182,8 +208,9 @@ class Tip extends React.Component {
               newtext: currentTip.text,
               newdesc: currentTip.description,
               newname: currentTip.name,
-              charging: false
-            })
+              charging: false,
+              commentaires: currentTip.commentaires || [],
+            });
           })
         } else {
           this.setState({
@@ -278,7 +305,7 @@ class Tip extends React.Component {
 
   render() {
     const { classes } = this.props;
-    const { tip, charging, isDialogFullScreen, newname, newtext, newdesc, isMenuOpen } = this.state;
+    const { tip, charging, isDialogFullScreen, newname, newtext, newdesc, isMenuOpen, commentaires } = this.state;
     const modules = {
       toolbar: [
         [{ 'header': [1, 2, false] }],
@@ -296,11 +323,17 @@ class Tip extends React.Component {
       'link', 'image'
     ];
 
-
-    let commentaires =
-      <React.Fragment>
-        Ici les commentaires ( modifier la variable commentaires dans Tip.js)
-      </React.Fragment>;
+    var listCommentaires =
+      commentaires != undefined ?
+        commentaires.map(commentaire => {
+          return <div className={classes.commentaire}>
+            <div className={classes.commentaireHeader}>
+              <Avatar className={classes.userAvatar} src={commentaire.usersImage} alt=""></Avatar>
+              {commentaire.usersPseudo}
+            </div>
+            <div className={classes.commentContent} dangerouslySetInnerHTML={{ __html: commentaire.content }}></div>
+          </div>
+        }) : null;
     return (
       <div className={classes.root}>
         <div className={classes.keyboardReturnIcon}>
@@ -372,7 +405,7 @@ class Tip extends React.Component {
 
 
               <div className={classes.commentarySection}>
-                {commentaires}
+                {listCommentaires}
                 <div className={classes.tipTitle}>
                   Poster un commentaire.
                 </div>
