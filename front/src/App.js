@@ -126,9 +126,9 @@ class SearchAppBar extends React.Component {
     this.inputRef = null;
   }
 
-  componentDidMount() {
+  componentWillMount() {
     // Les valeurs dans le localStorage sont toujours des strings, pour ça qu'on vérifie "null" et non pas null
-    if (localStorage["currentUserId"] != undefined) {
+    if ((localStorage["currentUserIdValdezTips"] != undefined && localStorage["currentUserIdValdezTips"] != "null") && (localStorage["currentUserValdezTips"] != undefined && localStorage["currentUserValdezTips"] != "null")) {
       this.setState({
         isAUserConnected: true
       });
@@ -142,8 +142,8 @@ class SearchAppBar extends React.Component {
   }
 
   getCurrentUserId() {
-    if (localStorage["currentUserId"]) {
-      return localStorage["currentUserId"];
+    if (localStorage["currentUserIdValdezTips"]) {
+      return localStorage["currentUserIdValdezTips"];
     }
   }
 
@@ -240,7 +240,7 @@ class SearchAppBar extends React.Component {
   render() {
     const { classes } = this.props;
     const { isAUserConnected, user, isMenuOpen, isSearchMenuOpen, modifiedMyAccount, isSearchCharging } = this.state;
-
+    console.log("is a user connected in render:", isAUserConnected);
     const myAccount = <Dialog
       open={this.state.openMyAccount}
       onClose={() => { this.setState({ openMyAccount: false }) }}
@@ -360,7 +360,7 @@ class SearchAppBar extends React.Component {
                                 Mon compte
                               </MenuItem>
                               <MenuItem className={classes.menuItem} onClick={() => {
-                                localStorage["currentUserId"] = null;
+                                localStorage["currentUserIdValdezTips"] = null;
                                 this.setState({
                                   isAUserConnected: false,
                                 });
@@ -454,7 +454,6 @@ class SearchAppBar extends React.Component {
                 <FoldersPage />
               </Route>
             </Switch>
-
           </Router>
           :
           <Login />
